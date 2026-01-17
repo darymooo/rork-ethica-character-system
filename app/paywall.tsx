@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, Alert, ActivityIndicator, Platform, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, Alert, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { X, Check, Sparkles, Zap } from 'lucide-react-native';
+import { Check, Sparkles, Zap } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
 import { useEthica } from '@/contexts/EthicaContext';
@@ -32,51 +32,16 @@ export default function Paywall() {
     isLoadingOfferings,
   } = useRevenueCat();
 
-  const [selectedPackage, setSelectedPackage] = useState<'monthly' | 'annual'>('annual');
-  const [showDiscountModal, setShowDiscountModal] = useState<boolean>(false);
+  const [selectedPackage, setSelectedPackage] = useState<'weekly' | 'monthly'>('monthly');
 
+  const weeklyPackage = offerings?.current?.availablePackages.find(
+    pkg => pkg.identifier === '$rc_weekly'
+  );
   const monthlyPackage = offerings?.current?.availablePackages.find(
     pkg => pkg.identifier === '$rc_monthly'
   );
-  const annualPackage = offerings?.current?.availablePackages.find(
-    pkg => pkg.identifier === '$rc_annual'
-  );
 
   const handleClose = () => {
-    if (!state.hasSeenOnboarding || showDiscountModal) {
-      router.replace('/virtue-selection');
-    } else {
-      setShowDiscountModal(true);
-    }
-  };
-
-  const handleDiscountPurchase = async () => {
-    if (Platform.OS === 'web') {
-      Alert.alert(
-        'Not Available',
-        'Purchases are not available on the web version. Please use the mobile app to upgrade to Pro.'
-      );
-      return;
-    }
-
-    try {
-      const packageId = '$rc_annual';
-      await purchase(packageId);
-      setShowDiscountModal(false);
-      Alert.alert(
-        'Success!',
-        'Welcome to Ethica Pro! You now have access to all premium features.',
-        [{ text: 'Continue', onPress: () => router.replace('/virtue-selection') }]
-      );
-    } catch (error: any) {
-      if (error.message !== 'Purchase cancelled') {
-        Alert.alert('Purchase Failed', error.message || 'Something went wrong. Please try again.');
-      }
-    }
-  };
-
-  const handleSkipToApp = () => {
-    setShowDiscountModal(false);
     router.replace('/virtue-selection');
   };
 
@@ -90,7 +55,7 @@ export default function Paywall() {
     }
 
     try {
-      const packageId = selectedPackage === 'monthly' ? '$rc_monthly' : '$rc_annual';
+      const packageId = selectedPackage === 'weekly' ? '$rc_weekly' : '$rc_monthly';
       await purchase(packageId);
       Alert.alert(
         'Success!',
@@ -125,11 +90,11 @@ export default function Paywall() {
     }
   };
 
-  const monthlyPrice = monthlyPackage?.product?.priceString || '$4.99';
-  const annualPrice = annualPackage?.product?.priceString || '$39.99';
-  const monthlySavings = monthlyPackage && annualPackage 
-    ? Math.round((1 - (annualPackage.product.price / (monthlyPackage.product.price * 12))) * 100)
-    : 33;
+  const weeklyPrice = weeklyPackage?.product?.priceString || '$2.99';
+  const monthlyPrice = monthlyPackage?.product?.priceString || '$9.99';
+  const weeklySavings = weeklyPackage && monthlyPackage 
+    ? Math.round((1 - (monthlyPackage.product.price / (weeklyPackage.product.price * 4))) * 100)
+    : 25;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -182,37 +147,6 @@ export default function Paywall() {
                   styles.pricingCard,
                   {
                     backgroundColor: theme.surface,
-                    borderColor: selectedPackage === 'annual' ? theme.accent : theme.border,
-                    borderWidth: selectedPackage === 'annual' ? 2 : 1,
-                  },
-                ]}
-                onPress={() => setSelectedPackage('annual')}
-                activeOpacity={0.7}
-                testID="annual-package"
-              >
-                {monthlySavings > 0 && (
-                  <View style={[styles.badge, { backgroundColor: theme.accent }]}>
-                    <Text style={[styles.badgeText, { color: '#FFFFFF' }]}>
-                      Save {monthlySavings}%
-                    </Text>
-                  </View>
-                )}
-                <View style={styles.pricingHeader}>
-                  <Text style={[styles.planName, { color: theme.text }]}>Annual</Text>
-                  <Text style={[styles.planPrice, { color: theme.text }]}>
-                    {annualPrice}<Text style={[styles.planPeriod, { color: theme.textSecondary }]}>/year</Text>
-                  </Text>
-                </View>
-                <Text style={[styles.planDetail, { color: theme.textSecondary }]}>
-                  Best value - less than $3.50/month
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.pricingCard,
-                  {
-                    backgroundColor: theme.surface,
                     borderColor: selectedPackage === 'monthly' ? theme.accent : theme.border,
                     borderWidth: selectedPackage === 'monthly' ? 2 : 1,
                   },
@@ -221,6 +155,13 @@ export default function Paywall() {
                 activeOpacity={0.7}
                 testID="monthly-package"
               >
+                {weeklySavings > 0 && (
+                  <View style={[styles.badge, { backgroundColor: theme.accent }]}>
+                    <Text style={[styles.badgeText, { color: '#FFFFFF' }]}>
+                      Best Value
+                    </Text>
+                  </View>
+                )}
                 <View style={styles.pricingHeader}>
                   <Text style={[styles.planName, { color: theme.text }]}>Monthly</Text>
                   <Text style={[styles.planPrice, { color: theme.text }]}>
@@ -229,6 +170,30 @@ export default function Paywall() {
                 </View>
                 <Text style={[styles.planDetail, { color: theme.textSecondary }]}>
                   Billed monthly, cancel anytime
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.pricingCard,
+                  {
+                    backgroundColor: theme.surface,
+                    borderColor: selectedPackage === 'weekly' ? theme.accent : theme.border,
+                    borderWidth: selectedPackage === 'weekly' ? 2 : 1,
+                  },
+                ]}
+                onPress={() => setSelectedPackage('weekly')}
+                activeOpacity={0.7}
+                testID="weekly-package"
+              >
+                <View style={styles.pricingHeader}>
+                  <Text style={[styles.planName, { color: theme.text }]}>Weekly</Text>
+                  <Text style={[styles.planPrice, { color: theme.text }]}>
+                    {weeklyPrice}<Text style={[styles.planPeriod, { color: theme.textSecondary }]}>/week</Text>
+                  </Text>
+                </View>
+                <Text style={[styles.planDetail, { color: theme.textSecondary }]}>
+                  Billed weekly, cancel anytime
                 </Text>
               </TouchableOpacity>
             </View>
@@ -279,95 +244,10 @@ export default function Paywall() {
           </TouchableOpacity>
 
           <Text style={[styles.disclaimer, { color: theme.textTertiary }]}>
-            3-day free trial, then {selectedPackage === 'annual' ? annualPrice : monthlyPrice}{selectedPackage === 'annual' ? '/year' : '/month'}. Cancel anytime.
+            3-day free trial, then {selectedPackage === 'monthly' ? monthlyPrice : weeklyPrice}{selectedPackage === 'monthly' ? '/month' : '/week'}. Cancel anytime.
           </Text>
         </View>
       </SafeAreaView>
-
-      <Modal
-        visible={showDiscountModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={handleSkipToApp}
-      >
-        <View style={[styles.modalContainer, { backgroundColor: theme.background }]}>
-          <SafeAreaView style={styles.modalSafeArea} edges={['top']}>
-            <ScrollView
-              contentContainerStyle={styles.modalContent}
-              showsVerticalScrollIndicator={false}
-            >
-              <View style={styles.modalHeader}>
-                <Text style={[styles.modalTitle, { color: theme.text }]}>
-                  Wait! Special Offer
-                </Text>
-                <Text style={[styles.modalSubtitle, { color: theme.textSecondary }]}>
-                  Don&apos;t miss this exclusive discount
-                </Text>
-              </View>
-
-              <View style={[styles.discountCard, { backgroundColor: theme.surface, borderColor: theme.accent }]}>
-                <View style={[styles.discountBadge, { backgroundColor: theme.accent }]}>
-                  <Text style={styles.discountBadgeText}>LIMITED TIME</Text>
-                </View>
-                <Text style={[styles.discountTitle, { color: theme.text }]}>
-                  40% OFF First Year
-                </Text>
-                <Text style={[styles.discountPrice, { color: theme.text }]}>
-                  ${annualPackage ? (annualPackage.product.price * 0.6).toFixed(2) : '23.99'}
-                  <Text style={[styles.originalPrice, { color: theme.textTertiary }]}> {annualPrice}</Text>
-                </Text>
-                <Text style={[styles.discountDetail, { color: theme.textSecondary }]}>
-                  Less than $2/month • 3-day free trial included
-                </Text>
-              </View>
-
-              <View style={styles.urgencyContainer}>
-                <Text style={[styles.urgencyText, { color: theme.textSecondary }]}>
-                  This offer expires when you leave this page
-                </Text>
-              </View>
-
-              <View style={styles.modalFeatures}>
-                {PREMIUM_FEATURES.slice(0, 3).map((feature, index) => (
-                  <View key={index} style={styles.modalFeatureRow}>
-                    <Check size={20} color={theme.accent} strokeWidth={2.5} />
-                    <Text style={[styles.modalFeatureText, { color: theme.text }]}>
-                      {feature}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </ScrollView>
-
-            <View style={[styles.modalFooter, { borderTopColor: theme.border }]}>
-              <TouchableOpacity
-                style={[styles.discountButton, { backgroundColor: theme.accent }]}
-                onPress={handleDiscountPurchase}
-                disabled={isPurchasing}
-                activeOpacity={0.7}
-              >
-                {isPurchasing ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.discountButtonText}>
-                    Claim 40% Off
-                  </Text>
-                )}
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={styles.modalSkipButton}
-                onPress={handleSkipToApp}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.modalSkipButtonText, { color: theme.textSecondary }]}>
-                  No thanks, continue to app
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </SafeAreaView>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -544,118 +424,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#FFFFFF',
     letterSpacing: 0.5,
-  },
-  modalContainer: {
-    flex: 1,
-  },
-  modalSafeArea: {
-    flex: 1,
-  },
-  modalContent: {
-    paddingHorizontal: 32,
-    paddingTop: 32,
-    paddingBottom: 32,
-  },
-  modalHeader: {
-    alignItems: 'center',
-    marginBottom: 32,
-    gap: 8,
-  },
-  modalTitle: {
-    ...typography.serif.semibold,
-    fontSize: 32,
-    textAlign: 'center',
-  },
-  modalSubtitle: {
-    ...typography.sans.regular,
-    fontSize: sizes.body,
-    textAlign: 'center',
-  },
-  discountCard: {
-    padding: 24,
-    borderRadius: 16,
-    borderWidth: 2,
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 24,
-  },
-  discountBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  discountBadgeText: {
-    ...typography.sans.semibold,
-    fontSize: 11,
-    color: '#FFFFFF',
-    letterSpacing: 1,
-  },
-  discountTitle: {
-    ...typography.serif.semibold,
-    fontSize: 28,
-  },
-  discountPrice: {
-    ...typography.sans.semibold,
-    fontSize: 36,
-  },
-  originalPrice: {
-    ...typography.sans.regular,
-    fontSize: 24,
-    textDecorationLine: 'line-through',
-  },
-  discountDetail: {
-    ...typography.sans.regular,
-    fontSize: sizes.body,
-    textAlign: 'center',
-  },
-  urgencyContainer: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    marginBottom: 24,
-  },
-  urgencyText: {
-    ...typography.sans.medium,
-    fontSize: 14,
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  modalFeatures: {
-    gap: 16,
-  },
-  modalFeatureRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  modalFeatureText: {
-    ...typography.sans.regular,
-    fontSize: sizes.body,
-    flex: 1,
-  },
-  modalFooter: {
-    paddingHorizontal: 32,
-    paddingTop: 20,
-    paddingBottom: 20,
-    borderTopWidth: 1,
-    gap: 12,
-  },
-  discountButton: {
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  discountButtonText: {
-    ...typography.sans.semibold,
-    fontSize: sizes.label,
-    color: '#FFFFFF',
-  },
-  modalSkipButton: {
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  modalSkipButtonText: {
-    ...typography.sans.medium,
-    fontSize: sizes.body,
   },
 });
