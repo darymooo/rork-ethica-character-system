@@ -199,7 +199,7 @@ export default function Home() {
             {currentVirtue.fullDescription}
           </Text>
           <Text style={[styles.weekLabel, { color: theme.textTertiary }]}>
-            Week in progress
+            This week’s observation
           </Text>
         </View>
 
@@ -208,7 +208,7 @@ export default function Home() {
             style={[styles.weekCompleteBanner, { backgroundColor: theme.accent }]}
             onPress={() => router.push('/week-review')}
             activeOpacity={0.8}
-            accessibilityLabel="Week complete. Tap to review and choose your next virtue"
+            accessibilityLabel="This week is complete. Review your observations and select the next virtue"
             accessibilityRole="button"
             testID="week-complete-banner"
           >
@@ -235,7 +235,7 @@ export default function Home() {
               <Text style={[styles.tipTitle, { color: theme.accent }]}>Your First Week</Text>
             </View>
             <Text style={[styles.tipText, { color: theme.textSecondary }]}>
-              Franklin marked small dots on his virtue chart to track faults. Tap to learn more about his method.
+              Franklin quietly noted each fault on his virtue chart. Tap to explore his method.
             </Text>
           </TouchableOpacity>
         )}
