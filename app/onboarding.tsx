@@ -13,11 +13,11 @@ const screens = [
   },
   {
     title: 'One virtue. One week.',
-    body: 'You focus on a single virtue for seven days.\nEach fault is marked, not judged.',
+    body: 'Focus on a single virtue each week.\nEach fault is marked, not judged.',
   },
   {
     title: 'Perfection is not the goal.',
-    body: 'The goal is honest observation and fewer faults over time.',
+    body: 'Observe honestly. Notice changes over time.',
   },
 ];
 
