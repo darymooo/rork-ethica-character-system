@@ -153,9 +153,9 @@ export default function LogObservation() {
       }
       
       setTimeout(() => {
-        if (router.canGoBack()) {
+        try {
           router.back();
-        } else {
+        } catch {
           router.replace('/home');
         }
       }, 1200);
@@ -180,7 +180,13 @@ export default function LogObservation() {
           </Text>
           <TouchableOpacity
             style={styles.closeButton}
-            onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}
+            onPress={() => {
+              try {
+                router.back();
+              } catch {
+                router.replace('/home');
+              }
+            }}
             activeOpacity={0.7}
             accessibilityLabel="Close"
             accessibilityRole="button"

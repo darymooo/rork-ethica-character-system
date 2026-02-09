@@ -50,7 +50,13 @@ export default function VirtueQueue() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}
+          onPress={() => {
+            try {
+              router.back();
+            } catch {
+              router.replace('/home');
+            }
+          }}
           activeOpacity={0.7}
         >
           <ArrowLeft size={24} color={theme.text} strokeWidth={1.5} />

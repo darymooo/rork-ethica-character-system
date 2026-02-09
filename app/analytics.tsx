@@ -33,7 +33,13 @@ export default function Analytics() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}
+          onPress={() => {
+            try {
+              router.back();
+            } catch {
+              router.replace('/home');
+            }
+          }}
           activeOpacity={0.7}
           accessibilityLabel="Go back"
           accessibilityRole="button"

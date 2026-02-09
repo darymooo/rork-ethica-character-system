@@ -230,7 +230,13 @@ export default function PersonalJournal() {
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}
+            onPress={() => {
+              try {
+                router.back();
+              } catch {
+                router.replace('/home');
+              }
+            }}
             activeOpacity={0.7}
             testID="journal-back-button"
           >

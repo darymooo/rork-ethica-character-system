@@ -276,9 +276,9 @@ export default function Settings() {
           style={[styles.backButton, { backgroundColor: theme.surface }]}
           onPress={() => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            if (router.canGoBack()) {
+            try {
               router.back();
-            } else {
+            } catch {
               router.replace('/home');
             }
           }}
