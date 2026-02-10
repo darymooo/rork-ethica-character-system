@@ -12,8 +12,8 @@ function getRCToken() {
     return process.env.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY;
   }
   return Platform.select({
-    ios: process.env.appl_WixWLBduDUkzELcNKLCWTOXbwPU,
-    android: process.env.goog_laavvjgLVjmVDygfHozJbTNUGyp,
+    ios: process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY,
+    android: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY,
     default: process.env.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY,
   });
 }
