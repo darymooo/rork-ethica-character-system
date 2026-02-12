@@ -1,8 +1,8 @@
 import { useEthica } from '@/contexts/EthicaContext';
 import { VIRTUES, FRANKLIN_QUOTES } from '@/constants/virtues';
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, ScrollView, useWindowDimensions } from 'react-native';
+import { useMemo, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, ScrollView, useWindowDimensions, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 import colors from '@/constants/colors';
@@ -39,6 +39,32 @@ export default function WeekReview() {
 
   const randomQuote = useMemo(() => {
     return FRANKLIN_QUOTES[Math.floor(Math.random() * FRANKLIN_QUOTES.length)];
+  }, []);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const scaleAnim = useRef(new Animated.Value(0.95)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        friction: 9,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 7,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, []);
 
   const handleRepeat = async () => {
@@ -156,9 +182,21 @@ export default function WeekReview() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
       >
 
-        <View style={styles.resultsSection}>
+        <Animated.View 
+          style={[
+            styles.resultsSection,
+            {
+              opacity: fadeAnim,
+              transform: [
+                { translateY: slideAnim },
+                { scale: scaleAnim },
+              ],
+            },
+          ]}
+        >
           <View style={styles.virtueContainer}>
             <Text style={[styles.virtueName, { color: theme.text }]}>
               {currentVirtue.name}
@@ -210,7 +248,7 @@ export default function WeekReview() {
               — Benjamin Franklin
             </Text>
           </View>
-        </View>
+        </Animated.View>
 
         </ScrollView>
 

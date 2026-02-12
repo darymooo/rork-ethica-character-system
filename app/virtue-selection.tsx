@@ -120,24 +120,44 @@ export default function VirtueSelection() {
                   {virtue.context && (
                     <TouchableOpacity
                       style={styles.expandButton}
-                      onPress={() => setExpandedVirtueId(isExpanded ? null : virtue.id)}
+                      onPress={() => toggleExpanded(virtue.id)}
                       activeOpacity={0.7}
                       accessibilityLabel={isExpanded ? 'Collapse details' : 'Expand details'}
                       accessibilityRole="button"
                       testID={`expand-${virtue.id}`}
                     >
-                      {isExpanded ? (
-                        <ChevronUp size={20} color={theme.textTertiary} strokeWidth={1.5} />
-                      ) : (
+                      <Animated.View
+                        style={{
+                          transform: [{
+                            rotate: expandAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: ['0deg', '180deg'],
+                            }),
+                          }],
+                        }}
+                      >
                         <ChevronDown size={20} color={theme.textTertiary} strokeWidth={1.5} />
-                      )}
+                      </Animated.View>
                     </TouchableOpacity>
                   )}
                 </View>
               </TouchableOpacity>
 
               {isExpanded && virtue.context && (
-                <View style={[styles.expandedContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <Animated.View 
+                  style={[
+                    styles.expandedContent, 
+                    { 
+                      backgroundColor: theme.surface, 
+                      borderColor: theme.border,
+                      opacity: expandAnim,
+                      maxHeight: expandAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 500],
+                      }),
+                    },
+                  ]}
+                >
                   <View style={styles.contextSection}>
                     <Text style={[styles.contextTitle, { color: theme.textTertiary }]}>
                       Why This Matters
@@ -146,9 +166,9 @@ export default function VirtueSelection() {
                       {virtue.context}
                     </Text>
                   </View>
-                </View>
+                </Animated.View>
               )}
-            </View>
+            </Animated.View>
           );
         })}
 
@@ -157,12 +177,27 @@ export default function VirtueSelection() {
             <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Franklin&apos;s 13 Virtues</Text>
           </View>
         )}
-        {VIRTUES.map((virtue) => {
+        {VIRTUES.map((virtue, index) => {
           const isExpanded = expandedVirtueId === virtue.id;
           const needsWork = needsImprovement.includes(virtue.id);
+          const expandAnim = getExpandAnim(virtue.id);
           
           return (
-            <View key={virtue.id} style={styles.virtueCardContainer}>
+            <Animated.View 
+              key={virtue.id} 
+              style={[
+                styles.virtueCardContainer,
+                {
+                  opacity: entranceAnim,
+                  transform: [{
+                    translateY: entranceAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [20, 0],
+                    }),
+                  }],
+                },
+              ]}
+            >
               <TouchableOpacity
                 style={[
                   styles.virtueCard,
@@ -196,23 +231,43 @@ export default function VirtueSelection() {
                   </View>
                   <TouchableOpacity
                     style={styles.expandButton}
-                    onPress={() => setExpandedVirtueId(isExpanded ? null : virtue.id)}
+                    onPress={() => toggleExpanded(virtue.id)}
                     activeOpacity={0.7}
                     accessibilityLabel={isExpanded ? 'Collapse details' : 'Expand details'}
                     accessibilityRole="button"
                     testID={`expand-${virtue.id}`}
                   >
-                    {isExpanded ? (
-                      <ChevronUp size={20} color={theme.textTertiary} strokeWidth={1.5} />
-                    ) : (
+                    <Animated.View
+                      style={{
+                        transform: [{
+                          rotate: expandAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0deg', '180deg'],
+                          }),
+                        }],
+                      }}
+                    >
                       <ChevronDown size={20} color={theme.textTertiary} strokeWidth={1.5} />
-                    )}
+                    </Animated.View>
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>
 
               {isExpanded && (
-                <View style={[styles.expandedContent, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                <Animated.View 
+                  style={[
+                    styles.expandedContent, 
+                    { 
+                      backgroundColor: theme.surface, 
+                      borderColor: theme.border,
+                      opacity: expandAnim,
+                      maxHeight: expandAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 500],
+                      }),
+                    },
+                  ]}
+                >
                   <View style={styles.contextSection}>
                     <Text style={[styles.contextTitle, { color: theme.textTertiary }]}>
                       Context
@@ -230,9 +285,9 @@ export default function VirtueSelection() {
                       — Benjamin Franklin
                     </Text>
                   </View>
-                </View>
+                </Animated.View>
               )}
-            </View>
+            </Animated.View>
           );
         })}
       </ScrollView>

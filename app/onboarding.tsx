@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
-import { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, ActivityIndicator, Animated } from 'react-native';
 import { useEthica } from '@/contexts/EthicaContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import colors from '@/constants/colors';
@@ -33,6 +33,9 @@ export default function Onboarding() {
   
   const theme = isDark ? colors.dark : colors.light;
 
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
   if (isLoading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
@@ -41,9 +44,41 @@ export default function Onboarding() {
     );
   }
 
+  useEffect(() => {
+    fadeAnim.setValue(0);
+    slideAnim.setValue(30);
+    
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        friction: 9,
+        tension: 40,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [currentScreen]);
+
   const handleContinue = () => {
     if (currentScreen < screens.length - 1) {
-      setCurrentScreen(currentScreen + 1);
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: -20,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setCurrentScreen(currentScreen + 1);
+      });
     } else {
       updateState({ hasSeenOnboarding: true });
       router.replace('/paywall');
@@ -56,17 +91,33 @@ export default function Onboarding() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
       <View style={styles.content}>
-        <View style={styles.textContainer}>
+        <Animated.View 
+          style={[
+            styles.textContainer,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
           <Text style={[styles.title, { color: theme.text }]}>
             {currentContent.title}
           </Text>
           <Text style={[styles.body, { color: theme.textSecondary }]}>
             {currentContent.body}
           </Text>
-        </View>
+        </Animated.View>
 
         {currentScreen === 1 && (
-          <View style={styles.gridDemo}>
+          <Animated.View 
+            style={[
+              styles.gridDemo,
+              {
+                opacity: fadeAnim,
+                transform: [{ scale: fadeAnim }],
+              },
+            ]}
+          >
             <View style={styles.weekGrid}>
               {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
                 <View key={index} style={styles.dayColumn}>
@@ -79,7 +130,7 @@ export default function Onboarding() {
                 </View>
               ))}
             </View>
-          </View>
+          </Animated.View>
         )}
 
         <View style={styles.footer}>
