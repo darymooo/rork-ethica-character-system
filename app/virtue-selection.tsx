@@ -1,8 +1,8 @@
 import { useEthica } from '@/contexts/EthicaContext';
 import { VIRTUES } from '@/constants/virtues';
 import { useRouter } from 'expo-router';
-import { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme } from 'react-native';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronDown, ChevronUp, Sparkles } from 'lucide-react-native';
 import colors from '@/constants/colors';
@@ -18,6 +18,43 @@ export default function VirtueSelection() {
   const nextQueuedVirtue = getNextQueuedVirtue();
   const [selectedVirtueId, setSelectedVirtueId] = useState<string | null>(nextQueuedVirtue);
   const [expandedVirtueId, setExpandedVirtueId] = useState<string | null>(null);
+  const expandAnimsRef = useRef<{ [key: string]: Animated.Value }>({});
+  const entranceAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(entranceAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  const getExpandAnim = (virtueId: string) => {
+    if (!expandAnimsRef.current[virtueId]) {
+      expandAnimsRef.current[virtueId] = new Animated.Value(0);
+    }
+    return expandAnimsRef.current[virtueId];
+  };
+
+  const toggleExpanded = (virtueId: string) => {
+    const isCurrentlyExpanded = expandedVirtueId === virtueId;
+    const expandAnim = getExpandAnim(virtueId);
+
+    if (isCurrentlyExpanded) {
+      Animated.timing(expandAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start(() => setExpandedVirtueId(null));
+    } else {
+      setExpandedVirtueId(virtueId);
+      Animated.timing(expandAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
 
   const needsImprovement = getVirtuesNeedingImprovement();
   const customVirtues = getCustomVirtues();
@@ -85,6 +122,7 @@ export default function VirtueSelection() {
         )}
         {customVirtues.map((virtue) => {
           const isExpanded = expandedVirtueId === virtue.id;
+          const expandAnim = getExpandAnim(virtue.id);
           
           return (
             <View key={virtue.id} style={styles.virtueCardContainer}>
@@ -168,7 +206,7 @@ export default function VirtueSelection() {
                   </View>
                 </Animated.View>
               )}
-            </Animated.View>
+            </View>
           );
         })}
 
