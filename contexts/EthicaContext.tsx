@@ -2,7 +2,6 @@ import createContextHook from '@nkzw/create-context-hook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { scheduleEveningReflection, scheduleWeekEndReminder } from '@/utils/notifications';
 import { VIRTUES } from '@/constants/virtues';
 
 export interface DailyObservation {
@@ -56,8 +55,6 @@ export interface AppState {
   darkMode: boolean;
   followSystemTheme: boolean;
   virtueQueue: string[];
-  enableNotifications: boolean;
-  notificationTime: string;
   streakData: StreakData;
   journalEntries: JournalEntry[];
   customVirtues: CustomVirtue[];
@@ -76,8 +73,6 @@ const defaultState: AppState = {
   darkMode: false,
   followSystemTheme: false,
   virtueQueue: [],
-  enableNotifications: false,
-  notificationTime: '20:00',
   streakData: {
     currentStreak: 0,
     longestStreak: 0,
@@ -300,14 +295,6 @@ export const [EthicaProvider, useEthica] = createContextHook(() => {
       currentWeekStartDate: startDate,
       currentWeekObservations: [],
     });
-    
-    if (state.enableNotifications) {
-      const virtue = VIRTUES.find(v => v.id === virtueId);
-      if (virtue) {
-        await scheduleEveningReflection(state.notificationTime, virtue.name);
-        await scheduleWeekEndReminder(startDate, virtue.name);
-      }
-    }
   };
 
   const isWeekComplete = (): boolean => {

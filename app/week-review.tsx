@@ -7,7 +7,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
-import { sendImmediateWeeklySummary } from '@/utils/notifications';
 import { requestStoreReview, shouldTriggerReview } from '@/utils/storeReview';
 
 export default function WeekReview() {
@@ -71,15 +70,6 @@ export default function WeekReview() {
     if (!state.currentVirtueId || !currentVirtue) return;
     const virtueToRepeat = state.currentVirtueId;
     
-    if (state.enableNotifications) {
-      await sendImmediateWeeklySummary(
-        currentVirtue.name,
-        totalFaults,
-        observations.length,
-        state.streakData.currentStreak
-      );
-    }
-    
     const isPerfectWeek = totalFaults === 0 && observations.length === 7;
     
     completeWeek(observations);
@@ -100,15 +90,6 @@ export default function WeekReview() {
   };
 
   const handleNext = async () => {
-    if (currentVirtue && state.enableNotifications) {
-      await sendImmediateWeeklySummary(
-        currentVirtue.name,
-        totalFaults,
-        observations.length,
-        state.streakData.currentStreak
-      );
-    }
-    
     const isPerfectWeek = totalFaults === 0 && observations.length === 7;
     const cycleProgress = getCycleProgress();
     const perfectWeeksCount = state.streakData.perfectWeeks + (isPerfectWeek ? 1 : 0);

@@ -1,15 +1,13 @@
 import { useEthica } from '@/contexts/EthicaContext';
 import { useRevenueCat } from '@/contexts/RevenueCatContext';
 import { useRouter } from 'expo-router';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, Alert, Platform, TextInput, KeyboardAvoidingView, Keyboard, Animated, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, Alert, Platform, KeyboardAvoidingView, Animated, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, ChevronRight, Calendar, Bell, Clock, Sun, Moon, Download, ListOrdered, RotateCcw, BookOpen, Shield, Info, Sparkles, Edit3 } from 'lucide-react-native';
+import { ArrowLeft, ChevronRight, Calendar, Sun, Moon, Download, ListOrdered, RotateCcw, BookOpen, Shield, Info, Sparkles, Edit3 } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
 import { exportCharacterRecord } from '@/utils/exportData';
-import { requestNotificationPermissions, scheduleEveningReflection, cancelAllNotifications } from '@/utils/notifications';
-import React, { useState, useRef, useCallback } from 'react';
-import { VIRTUES } from '@/constants/virtues';
+import React, { useState, useCallback, useRef } from 'react';
 import * as Haptics from 'expo-haptics';
 
 interface ToggleSwitchProps {
@@ -131,10 +129,7 @@ export default function Settings() {
   const isDark = state.followSystemTheme ? systemColorScheme === 'dark' : state.darkMode;
   const theme = isDark ? colors.dark : colors.light;
 
-  const [editingTime, setEditingTime] = useState(false);
-  const [timeInput, setTimeInput] = useState(state.notificationTime);
   const [isExporting, setIsExporting] = useState(false);
-  const scrollViewRef = useRef<ScrollView>(null);
 
   const handleWeekStartToggle = () => {
     updateState({ weekStartsMonday: !state.weekStartsMonday });
@@ -150,45 +145,6 @@ export default function Settings() {
     }
   };
 
-  const handleNotificationToggle = async () => {
-    const newValue = !state.enableNotifications;
-    
-    if (newValue) {
-      const granted = await requestNotificationPermissions();
-      if (granted) {
-        const currentVirtue = VIRTUES.find(v => v.id === state.currentVirtueId);
-        await scheduleEveningReflection(state.notificationTime, currentVirtue?.name);
-        updateState({ enableNotifications: true });
-      } else {
-        if (Platform.OS === 'web') {
-          alert('Notification permissions are required.');
-        } else {
-          Alert.alert('Permission Required', 'Please enable notifications in your device settings.');
-        }
-      }
-    } else {
-      await cancelAllNotifications();
-      updateState({ enableNotifications: false });
-    }
-  };
-
-  const handleTimeChange = async () => {
-    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    if (timeRegex.test(timeInput)) {
-      updateState({ notificationTime: timeInput });
-      if (state.enableNotifications) {
-        const currentVirtue = VIRTUES.find(v => v.id === state.currentVirtueId);
-        await scheduleEveningReflection(timeInput, currentVirtue?.name);
-      }
-      setEditingTime(false);
-    } else {
-      if (Platform.OS === 'web') {
-        alert('Invalid time format. Please use HH:MM format (e.g., 20:00).');
-      } else {
-        Alert.alert('Invalid Time', 'Please use HH:MM format (e.g., 20:00).');
-      }
-    }
-  };
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -296,7 +252,6 @@ export default function Settings() {
       </View>
 
       <ScrollView
-        ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -311,6 +266,7 @@ export default function Settings() {
               icon={<Calendar size={18} color={theme.accent} strokeWidth={2} />}
               label="Week starts on Monday"
               theme={theme}
+              isLast
               rightElement={
                 <ToggleSwitch
                   value={state.weekStartsMonday}
@@ -319,63 +275,6 @@ export default function Settings() {
                 />
               }
             />
-            <SettingRow
-              icon={<Bell size={18} color={theme.accent} strokeWidth={2} />}
-              label="Daily reminder"
-              theme={theme}
-              rightElement={
-                <ToggleSwitch
-                  value={state.enableNotifications}
-                  onToggle={handleNotificationToggle}
-                  theme={theme}
-                />
-              }
-            />
-            {state.enableNotifications && (
-              <SettingRow
-                icon={<Clock size={18} color={theme.accent} strokeWidth={2} />}
-                label="Reminder time"
-                theme={theme}
-                isLast
-                rightElement={
-                  editingTime ? (
-                    <TextInput
-                      style={[styles.timeInput, { color: theme.text, backgroundColor: theme.backgroundSecondary }]}
-                      value={timeInput}
-                      onChangeText={setTimeInput}
-                      placeholder="20:00"
-                      placeholderTextColor={theme.textTertiary}
-                      keyboardType="numbers-and-punctuation"
-                      maxLength={5}
-                      autoFocus
-                      onBlur={handleTimeChange}
-                      onSubmitEditing={() => {
-                        handleTimeChange();
-                        Keyboard.dismiss();
-                      }}
-                      onFocus={() => {
-                        setTimeout(() => {
-                          scrollViewRef.current?.scrollTo({ y: 100, animated: true });
-                        }, 100);
-                      }}
-                    />
-                  ) : (
-                    <TouchableOpacity
-                      onPress={() => setEditingTime(true)}
-                      activeOpacity={0.6}
-                      style={[styles.timeDisplay, { backgroundColor: theme.backgroundSecondary }]}
-                    >
-                      <Text style={[styles.timeText, { color: theme.text }]}>
-                        {state.notificationTime}
-                      </Text>
-                    </TouchableOpacity>
-                  )
-                }
-              />
-            )}
-            {!state.enableNotifications && (
-              <View style={{ height: 0 }} />
-            )}
           </View>
         </View>
 

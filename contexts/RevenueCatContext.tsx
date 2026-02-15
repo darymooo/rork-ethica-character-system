@@ -3,7 +3,6 @@ import Purchases, { CustomerInfo, PurchasesOfferings } from 'react-native-purcha
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, useRef } from 'react';
 import { Platform } from 'react-native';
-import { scheduleWinBackNotification, cancelWinBackNotification } from '@/utils/notifications';
 
 const ENTITLEMENT_ID = 'Ethica Pro';
 
@@ -77,20 +76,6 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
     if (previousProStatus.current === null) {
       previousProStatus.current = currentProStatus;
       return;
-    }
-
-    if (previousProStatus.current === true && currentProStatus === false) {
-      console.log('Subscription cancelled - scheduling win-back notification');
-      scheduleWinBackNotification().catch(error => {
-        console.error('Failed to schedule win-back notification:', error);
-      });
-    }
-
-    if (previousProStatus.current === false && currentProStatus === true) {
-      console.log('Subscription activated - cancelling win-back notification');
-      cancelWinBackNotification().catch(error => {
-        console.error('Failed to cancel win-back notification:', error);
-      });
     }
 
     previousProStatus.current = currentProStatus;

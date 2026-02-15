@@ -90,13 +90,6 @@ export default function Policies() {
             </Text>
 
             <Text style={[styles.heading, { color: theme.text }]}>
-              Notifications
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              If you enable daily reminders, notifications are scheduled locally on your device. No notification data is sent to external servers.
-            </Text>
-
-            <Text style={[styles.heading, { color: theme.text }]}>
               Analytics
             </Text>
             <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
