@@ -104,8 +104,14 @@ export default function Paywall() {
     }
   };
 
-  const weeklyPrice = weeklyPackage?.product?.priceString || '$2.99';
-  const monthlyPrice = monthlyPackage?.product?.priceString || '$9.99';
+  const sanitizePrice = (price: string) =>
+    price
+      .replace(/\s*\(?[^)]*trial[^)]*\)?/gi, '')
+      .replace(/\b\d+\s*-?\s*day\b[^)]*/gi, '')
+      .trim();
+
+  const weeklyPrice = sanitizePrice(weeklyPackage?.product?.priceString || '$2.99');
+  const monthlyPrice = sanitizePrice(monthlyPackage?.product?.priceString || '$9.99');
   const weeklySavings = weeklyPackage && monthlyPackage 
     ? Math.round((1 - (monthlyPackage.product.price / (weeklyPackage.product.price * 4))) * 100)
     : 25;
@@ -439,20 +445,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     lineHeight: 16,
-  },
-  trialBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 8,
-  },
-  trialBadgeText: {
-    ...typography.sans.semibold,
-    fontSize: 14,
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
   },
 });
