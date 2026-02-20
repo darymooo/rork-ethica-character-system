@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { EthicaProvider, useEthica } from "@/contexts/EthicaContext";
 import { RevenueCatProvider } from "@/contexts/RevenueCatContext";
@@ -21,12 +21,37 @@ const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   const { isLoading } = useEthica();
+  const [hasHiddenSplash, setHasHiddenSplash] = useState<boolean>(false);
+
+  useEffect(() => {
+    console.log("RootLayoutNav: isLoading changed", { isLoading });
+  }, [isLoading]);
+
+  useEffect(() => {
+    const forceHide = async () => {
+      try {
+        console.warn("RootLayoutNav: forcing splash hide after timeout");
+        await SplashScreen.hideAsync();
+        setHasHiddenSplash(true);
+      } catch (error) {
+        console.error("Failed to force hide splash:", error);
+      }
+    };
+
+    const timeout = setTimeout(() => {
+      void forceHide();
+    }, 4000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     const hideSplash = async () => {
       try {
-        if (!isLoading) {
+        if (!isLoading && !hasHiddenSplash) {
+          console.log("RootLayoutNav: hiding splash (data ready)");
           await SplashScreen.hideAsync();
+          setHasHiddenSplash(true);
         }
       } catch (error) {
         console.error("Failed to hide splash:", error);
@@ -34,7 +59,7 @@ function RootLayoutNav() {
     };
 
     void hideSplash();
-  }, [isLoading]);
+  }, [hasHiddenSplash, isLoading]);
 
   return (
     <Stack screenOptions={{ headerShown: false, headerBackTitle: "Back" }}>
