@@ -7,7 +7,15 @@ import { EthicaProvider, useEthica } from "@/contexts/EthicaContext";
 import { RevenueCatProvider } from "@/contexts/RevenueCatContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-SplashScreen.preventAutoHideAsync();
+const prepareSplash = async () => {
+  try {
+    await SplashScreen.preventAutoHideAsync();
+  } catch (error) {
+    console.error("Failed to prevent auto hide splash:", error);
+  }
+};
+
+void prepareSplash();
 
 const queryClient = new QueryClient();
 
@@ -15,9 +23,17 @@ function RootLayoutNav() {
   const { isLoading } = useEthica();
 
   useEffect(() => {
-    if (!isLoading) {
-      SplashScreen.hideAsync();
-    }
+    const hideSplash = async () => {
+      try {
+        if (!isLoading) {
+          await SplashScreen.hideAsync();
+        }
+      } catch (error) {
+        console.error("Failed to hide splash:", error);
+      }
+    };
+
+    void hideSplash();
   }, [isLoading]);
 
   return (

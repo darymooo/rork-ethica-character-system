@@ -2,7 +2,7 @@
   "expo": {
     "name": "Ethica: Habit & Virtue Tracker",
     "slug": "ethica-character-system-az74np5",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "rork-app",
