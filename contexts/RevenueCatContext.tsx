@@ -129,6 +129,16 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
     enabled: isInitialized,
   });
 
+  const refreshRevenueCat = async () => {
+    if (Platform.OS === 'web') {
+      return;
+    }
+    await Promise.all([
+      customerInfoQuery.refetch(),
+      offeringsQuery.refetch(),
+    ]);
+  };
+
   const purchaseMutation = useMutation({
     mutationFn: async (packageId: string) => {
       if (Platform.OS === 'web') {
@@ -227,6 +237,7 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
     isLoadingOfferings: offeringsQuery.isLoading,
     purchase,
     restorePurchases,
+    refreshRevenueCat,
     isPurchasing: purchaseMutation.isPending,
     isRestoring: restoreMutation.isPending,
     purchaseError: purchaseMutation.error,

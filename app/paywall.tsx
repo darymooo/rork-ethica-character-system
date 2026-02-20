@@ -27,12 +27,14 @@ export default function Paywall() {
     offerings,
     purchase,
     restorePurchases,
+    refreshRevenueCat,
     isPurchasing,
     isRestoring,
     isLoadingOfferings,
   } = useRevenueCat();
 
   const [selectedPackage, setSelectedPackage] = useState<'weekly' | 'monthly'>('monthly');
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const weeklyPackage = offerings?.current?.availablePackages.find(
     pkg => pkg.identifier === '$rc_weekly'
@@ -66,6 +68,18 @@ export default function Paywall() {
       if (error.message !== 'Purchase cancelled') {
         Alert.alert('Purchase Failed', error.message || 'Something went wrong. Please try again.');
       }
+    }
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshRevenueCat();
+      Alert.alert('Refreshed', 'RevenueCat data has been refreshed.');
+    } catch (error: any) {
+      Alert.alert('Refresh Failed', error?.message || 'Could not refresh RevenueCat data.');
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -243,6 +257,22 @@ export default function Paywall() {
             </Text>
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={styles.refreshButton}
+            onPress={handleRefresh}
+            disabled={isRefreshing || isLoadingOfferings}
+            activeOpacity={0.7}
+            testID="refresh-revenuecat-button"
+          >
+            {isRefreshing ? (
+              <ActivityIndicator size="small" color={theme.textTertiary} />
+            ) : (
+              <Text style={[styles.restoreButtonText, { color: theme.textTertiary }]}>
+                Refresh RevenueCat
+              </Text>
+            )}
+          </TouchableOpacity>
+
           <Text style={[styles.disclaimer, { color: theme.textTertiary }]}>
             3-day free trial, then {selectedPackage === 'monthly' ? monthlyPrice : weeklyPrice}{selectedPackage === 'monthly' ? '/month' : '/week'}. Cancel anytime.
           </Text>
@@ -398,6 +428,10 @@ const styles = StyleSheet.create({
   },
   restoreButton: {
     paddingVertical: 12,
+    alignItems: 'center',
+  },
+  refreshButton: {
+    paddingVertical: 10,
     alignItems: 'center',
   },
   restoreButtonText: {
