@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, A
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Check, Sparkles, Zap } from 'lucide-react-native';
+import { Check, Sparkles } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
 import { useEthica } from '@/contexts/EthicaContext';
@@ -128,10 +128,6 @@ export default function Paywall() {
             <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
               Unlock the full potential of your character development journey
             </Text>
-            <View style={[styles.trialBadge, { backgroundColor: theme.accent }]}>
-              <Zap size={16} color="#FFFFFF" strokeWidth={2.5} />
-              <Text style={styles.trialBadgeText}>3-Day Free Trial</Text>
-            </View>
           </View>
 
           <View style={styles.featuresContainer}>
@@ -216,7 +212,7 @@ export default function Paywall() {
 
         <View style={[styles.footer, { borderTopColor: theme.border }]}>
           <Text style={[styles.noPaymentText, { color: theme.textSecondary }]}>
-            No payment required now
+            Choose a plan to unlock Ethica Pro
           </Text>
           <TouchableOpacity
             style={[styles.subscribeButton, { backgroundColor: theme.accent }]}
@@ -229,7 +225,7 @@ export default function Paywall() {
               <ActivityIndicator size="small" color="#FFFFFF" />
             ) : (
               <Text style={styles.subscribeButtonText}>
-                Start Free Trial
+                Subscribe Now
               </Text>
             )}
           </TouchableOpacity>
@@ -274,7 +270,7 @@ export default function Paywall() {
           </TouchableOpacity>
 
           <Text style={[styles.disclaimer, { color: theme.textTertiary }]}>
-            3-day free trial, then {selectedPackage === 'monthly' ? monthlyPrice : weeklyPrice}{selectedPackage === 'monthly' ? '/month' : '/week'}. Cancel anytime.
+            {selectedPackage === 'monthly' ? monthlyPrice : weeklyPrice}{selectedPackage === 'monthly' ? '/month' : '/week'}. Cancel anytime.
           </Text>
         </View>
       </SafeAreaView>
