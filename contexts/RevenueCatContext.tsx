@@ -1,8 +1,26 @@
 import createContextHook from '@nkzw/create-context-hook';
-import Purchases, { CustomerInfo, PurchasesOfferings } from 'react-native-purchases';
+import type { CustomerInfo, PurchasesOfferings } from 'react-native-purchases';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, useRef } from 'react';
 import { Platform } from 'react-native';
+
+type PurchasesModule = typeof import('react-native-purchases');
+type PurchasesType = PurchasesModule['default'];
+
+let purchasesInstance: PurchasesType | null = null;
+
+const getPurchases = (): PurchasesType | null => {
+  if (purchasesInstance) return purchasesInstance;
+  if (Platform.OS === 'web') return null;
+  try {
+    const module = require('react-native-purchases') as PurchasesModule;
+    purchasesInstance = module.default;
+    return purchasesInstance;
+  } catch (error) {
+    console.error('RevenueCat unavailable in Expo Go:', error);
+    return null;
+  }
+};
 
 const ENTITLEMENT_ID = 'Ethica Pro';
 
@@ -17,14 +35,6 @@ function getRCToken() {
   });
 }
 
-if (Platform.OS !== 'web') {
-  const apiKey = getRCToken();
-  if (apiKey) {
-    Purchases.configure({ apiKey });
-  } else {
-    console.error('RevenueCat API key not found');
-  }
-}
 
 export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
   const queryClient = useQueryClient();
@@ -33,17 +43,30 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
 
   useEffect(() => {
     const apiKey = getRCToken();
-    if (apiKey && Platform.OS !== 'web') {
-      try {
-        Purchases.configure({ apiKey });
-        setIsInitialized(true);
-        console.log('RevenueCat initialized successfully');
-      } catch (error) {
-        console.error('Failed to initialize RevenueCat:', error);
-      }
-    } else if (Platform.OS === 'web') {
+    if (Platform.OS === 'web') {
       setIsInitialized(true);
       console.log('RevenueCat: Web mode - features will be simulated');
+      return;
+    }
+
+    if (!apiKey) {
+      console.error('RevenueCat API key not found');
+      return;
+    }
+
+    const purchases = getPurchases();
+    if (!purchases) {
+      console.warn('RevenueCat not available. Skipping initialization.');
+      setIsInitialized(true);
+      return;
+    }
+
+    try {
+      purchases.configure({ apiKey });
+      setIsInitialized(true);
+      console.log('RevenueCat initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize RevenueCat:', error);
     }
   }, []);
 
@@ -53,15 +76,19 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       if (Platform.OS === 'web') {
         return null;
       }
+      const purchases = getPurchases();
+      if (!purchases) {
+        return null;
+      }
       try {
-        const customerInfo = await Purchases.getCustomerInfo();
+        const customerInfo = await purchases.getCustomerInfo();
         return customerInfo;
       } catch (error) {
         console.error('Error fetching customer info:', error);
         return null;
       }
     },
-    enabled: isInitialized && Platform.OS !== 'web',
+    enabled: isInitialized,
     refetchInterval: 60000,
   });
 
@@ -87,21 +114,30 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       if (Platform.OS === 'web') {
         return null;
       }
+      const purchases = getPurchases();
+      if (!purchases) {
+        return null;
+      }
       try {
-        const offerings = await Purchases.getOfferings();
+        const offerings = await purchases.getOfferings();
         return offerings;
       } catch (error) {
         console.error('Error fetching offerings:', error);
         return null;
       }
     },
-    enabled: isInitialized && Platform.OS !== 'web',
+    enabled: isInitialized,
   });
 
   const purchaseMutation = useMutation({
     mutationFn: async (packageId: string) => {
       if (Platform.OS === 'web') {
         throw new Error('Purchases not available on web');
+      }
+
+      const purchases = getPurchases();
+      if (!purchases) {
+        throw new Error('Purchases not available');
       }
 
       const offerings = offeringsQuery.data;
@@ -118,10 +154,10 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       }
 
       try {
-        const { customerInfo } = await Purchases.purchasePackage(pkg);
+        const { customerInfo } = await purchases.purchasePackage(pkg);
         return customerInfo;
       } catch (error: any) {
-        if (error.userCancelled) {
+        if (error?.userCancelled) {
           throw new Error('Purchase cancelled');
         }
         throw error;
@@ -137,8 +173,12 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       if (Platform.OS === 'web') {
         throw new Error('Restore not available on web');
       }
+      const purchases = getPurchases();
+      if (!purchases) {
+        throw new Error('Restore not available');
+      }
       try {
-        const customerInfo = await Purchases.restorePurchases();
+        const customerInfo = await purchases.restorePurchases();
         return customerInfo;
       } catch (error) {
         console.error('Error restoring purchases:', error);
