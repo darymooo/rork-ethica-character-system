@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, Alert, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Sparkles } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
@@ -35,6 +35,15 @@ export default function Paywall() {
 
   const [selectedPackage, setSelectedPackage] = useState<'weekly' | 'monthly'>('monthly');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+
+  useEffect(() => {
+    console.log('Paywall offerings:', offerings?.current?.availablePackages.map(pkg => ({
+      id: pkg.identifier,
+      priceString: pkg.product?.priceString,
+      introPrice: pkg.product?.introPrice?.priceString,
+      description: pkg.product?.description,
+    })));
+  }, [offerings]);
 
   const weeklyPackage = offerings?.current?.availablePackages.find(
     pkg => pkg.identifier === '$rc_weekly'
@@ -104,14 +113,21 @@ export default function Paywall() {
     }
   };
 
-  const sanitizePrice = (price: string) =>
-    price
+  const stripTrialText = (text: string) =>
+    text
       .replace(/\s*\(?[^)]*trial[^)]*\)?/gi, '')
       .replace(/\b\d+\s*-?\s*day\b[^)]*/gi, '')
+      .replace(/free\s*trial/gi, '')
+      .replace(/\btrial\b/gi, '')
+      .replace(/\s{2,}/g, ' ')
       .trim();
+
+  const sanitizePrice = (price: string) => stripTrialText(price);
+
 
   const weeklyPrice = sanitizePrice(weeklyPackage?.product?.priceString || '$2.99');
   const monthlyPrice = sanitizePrice(monthlyPackage?.product?.priceString || '$9.99');
+
   const weeklySavings = weeklyPackage && monthlyPackage 
     ? Math.round((1 - (monthlyPackage.product.price / (weeklyPackage.product.price * 4))) * 100)
     : 25;
@@ -218,7 +234,7 @@ export default function Paywall() {
 
         <View style={[styles.footer, { borderTopColor: theme.border }]}>
           <Text style={[styles.noPaymentText, { color: theme.textSecondary }]}>
-            Choose a plan to unlock Ethica Pro
+            Cancel anytime. No free trials.
           </Text>
           <TouchableOpacity
             style={[styles.subscribeButton, { backgroundColor: theme.accent }]}
