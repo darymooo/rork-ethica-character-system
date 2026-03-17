@@ -64,7 +64,7 @@ export default function WeekReview() {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+  }, [fadeAnim, scaleAnim, slideAnim]);
 
   const handleRepeat = async () => {
     if (!state.currentVirtueId || !currentVirtue) return;
@@ -73,7 +73,7 @@ export default function WeekReview() {
     const isPerfectWeek = totalFaults === 0 && observations.length === 7;
     
     completeWeek(observations);
-    startNewWeek(virtueToRepeat);
+    void startNewWeek(virtueToRepeat);
     
     if (isPerfectWeek) {
       const shouldRequest = await shouldTriggerReview({
@@ -81,7 +81,7 @@ export default function WeekReview() {
       });
       if (shouldRequest) {
         setTimeout(() => {
-          requestStoreReview();
+          void requestStoreReview();
         }, 800);
       }
     }
@@ -102,7 +102,7 @@ export default function WeekReview() {
       });
       if (shouldRequest) {
         setTimeout(() => {
-          requestStoreReview();
+          void requestStoreReview();
         }, 800);
       }
     } else if (cycleProgress.current === 13) {
@@ -112,7 +112,7 @@ export default function WeekReview() {
       });
       if (shouldRequest) {
         setTimeout(() => {
-          requestStoreReview();
+          void requestStoreReview();
         }, 800);
       }
     } else if (perfectWeeksCount > 0) {
@@ -122,7 +122,7 @@ export default function WeekReview() {
       });
       if (shouldRequest) {
         setTimeout(() => {
-          requestStoreReview();
+          void requestStoreReview();
         }, 800);
       }
     }

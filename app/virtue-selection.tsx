@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronDown, ChevronUp, Sparkles } from 'lucide-react-native';
+import { ChevronDown, Sparkles } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
 
@@ -27,7 +27,7 @@ export default function VirtueSelection() {
       duration: 300,
       useNativeDriver: true,
     }).start();
-  }, []);
+  }, [entranceAnim]);
 
   const getExpandAnim = (virtueId: string) => {
     if (!expandAnimsRef.current[virtueId]) {
@@ -80,7 +80,7 @@ export default function VirtueSelection() {
       }
       
       if (state.hasCompletedOnboarding) {
-        startNewWeek(selectedVirtueId);
+        void startNewWeek(selectedVirtueId);
         router.replace('/home');
       } else {
         completeOnboarding(selectedVirtueId);
@@ -215,7 +215,7 @@ export default function VirtueSelection() {
             <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Franklin&apos;s 13 Virtues</Text>
           </View>
         )}
-        {VIRTUES.map((virtue, index) => {
+        {VIRTUES.map((virtue, _index) => {
           const isExpanded = expandedVirtueId === virtue.id;
           const needsWork = needsImprovement.includes(virtue.id);
           const expandAnim = getExpandAnim(virtue.id);

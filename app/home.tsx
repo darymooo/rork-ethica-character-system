@@ -20,7 +20,8 @@ export default function Home() {
 
   const contentPadding = screenWidth < 380 ? 20 : 32;
   const gridGap = screenWidth < 380 ? 8 : 16;
-  const dayCellSize = Math.min(40, Math.floor((screenWidth - contentPadding * 2 - gridGap * 6) / 7));
+  const layoutWidth = Math.min(screenWidth, 860);
+  const dayCellSize = Math.min(40, Math.floor((layoutWidth - contentPadding * 2 - gridGap * 6) / 7));
 
   const currentVirtue = VIRTUES.find(v => v.id === state.currentVirtueId);
   const cycleProgress = getCycleProgress();
@@ -60,13 +61,14 @@ export default function Home() {
     return days[index];
   };
 
-  const handleDayPress = (dayIndex: number) => {
+  const handleDayPress = (_dayIndex: number) => {
     router.push('/log-observation');
   };
 
   if (!currentVirtue) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
+        <View style={[styles.pageShell, { maxWidth: layoutWidth }]}> 
         <View style={styles.emptyStateContainer}>
           <Text style={[styles.emptyStateTitle, { color: theme.text }]}>
             No virtue selected
@@ -87,12 +89,14 @@ export default function Home() {
             </Text>
           </TouchableOpacity>
         </View>
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
+      <View style={[styles.pageShell, { maxWidth: layoutWidth }]}> 
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.iconButton}
@@ -335,6 +339,7 @@ export default function Home() {
         visible={showInfoModal}
         onClose={() => setShowInfoModal(false)}
       />
+      </View>
     </SafeAreaView>
   );
 }
@@ -342,6 +347,11 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  pageShell: {
+    flex: 1,
+    width: '100%',
+    alignSelf: 'center',
   },
   header: {
     flexDirection: 'row',

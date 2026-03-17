@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, ActivityIndicator, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, ActivityIndicator, Animated, useWindowDimensions } from 'react-native';
 import { useEthica } from '@/contexts/EthicaContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import colors from '@/constants/colors';
@@ -32,17 +32,12 @@ export default function Onboarding() {
   }, [state.followSystemTheme, state.darkMode, systemColorScheme]);
   
   const theme = isDark ? colors.dark : colors.light;
+  const { width } = useWindowDimensions();
+  const isTabletLayout = width >= 768;
+  const horizontalPadding = width < 380 ? 20 : isTabletLayout ? 40 : 32;
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
-
-  if (isLoading) {
-    return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
-        <ActivityIndicator size="large" color={theme.accent} />
-      </View>
-    );
-  }
 
   useEffect(() => {
     fadeAnim.setValue(0);
@@ -61,7 +56,7 @@ export default function Onboarding() {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [currentScreen]);
+  }, [currentScreen, fadeAnim, slideAnim]);
 
   const handleContinue = () => {
     if (currentScreen < screens.length - 1) {
@@ -88,9 +83,18 @@ export default function Onboarding() {
   const currentContent = screens[currentScreen];
   const isLastScreen = currentScreen === screens.length - 1;
 
+  if (isLoading) {
+    return (
+      <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.accent} />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
-      <View style={styles.content}>
+      <View style={[styles.content, { paddingHorizontal: horizontalPadding }]}> 
+        <View style={[styles.contentShell, { maxWidth: isTabletLayout ? 760 : 560 }]}> 
         <Animated.View 
           style={[
             styles.textContainer,
@@ -162,6 +166,7 @@ export default function Onboarding() {
             </Text>
           </TouchableOpacity>
         </View>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -178,8 +183,12 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 32,
     paddingVertical: 48,
+  },
+  contentShell: {
+    flex: 1,
+    width: '100%',
+    alignSelf: 'center',
     justifyContent: 'space-between',
   },
   textContainer: {
@@ -192,12 +201,16 @@ const styles = StyleSheet.create({
     fontSize: sizes.xlarge,
     lineHeight: 44,
     textAlign: 'center',
+    maxWidth: 560,
+    alignSelf: 'center',
   },
   body: {
     ...typography.sans.regular,
     fontSize: sizes.body,
     lineHeight: 24,
     textAlign: 'center',
+    maxWidth: 520,
+    alignSelf: 'center',
   },
   gridDemo: {
     alignItems: 'center',

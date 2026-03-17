@@ -79,7 +79,7 @@ function RootLayoutNav() {
       <Stack.Screen name="policies" />
       <Stack.Screen name="personal-journal" />
       <Stack.Screen name="custom-virtues" />
-      <Stack.Screen name="paywall" options={{ presentation: "modal" }} />
+      <Stack.Screen name="paywall" options={{ presentation: "fullScreenModal" }} />
     </Stack>
   );
 }

@@ -1,33 +1,23 @@
 import createContextHook from '@nkzw/create-context-hook';
-import type { CustomerInfo, PurchasesOfferings } from 'react-native-purchases';
+import type { CustomerInfo, PurchasesOfferings, PurchasesPackage } from 'react-native-purchases';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState, useRef } from 'react';
-import { Platform } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type PurchasesModule = typeof import('react-native-purchases');
 type PurchasesType = PurchasesModule['default'];
 
-let purchasesInstance: PurchasesType | null = null;
+type RevenueCatPlan = 'weekly' | 'monthly';
 
-const getPurchases = (): PurchasesType | null => {
-  if (purchasesInstance) return purchasesInstance;
-  if (Platform.OS === 'web') return null;
-  try {
-    const module = require('react-native-purchases') as PurchasesModule;
-    purchasesInstance = module.default;
-    return purchasesInstance;
-  } catch (error) {
-    console.error('RevenueCat unavailable in Expo Go:', error);
-    return null;
-  }
-};
+let purchasesInstance: PurchasesType | null = null;
+let purchasesConfigured = false;
 
 const ENTITLEMENT_ID = 'Ethica Pro';
 
-function getRCToken() {
-  if (__DEV__ || Platform.OS === 'web') {
+function getRCToken(): string | undefined {
+  if (__DEV__) {
     return process.env.EXPO_PUBLIC_REVENUECAT_TEST_API_KEY;
   }
+
   return Platform.select({
     ios: process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY,
     android: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY,
@@ -35,53 +25,141 @@ function getRCToken() {
   });
 }
 
+function getPurchases(): PurchasesType | null {
+  if (purchasesInstance) {
+    return purchasesInstance;
+  }
+
+  try {
+    const module = require('react-native-purchases') as PurchasesModule;
+    purchasesInstance = module.default;
+    return purchasesInstance;
+  } catch (error) {
+    console.error('RevenueCat module unavailable:', error);
+    return null;
+  }
+}
+
+function resolvePackageByPlan(
+  offerings: PurchasesOfferings | null | undefined,
+  plan: RevenueCatPlan
+): PurchasesPackage | null {
+  const availablePackages = offerings?.current?.availablePackages ?? [];
+
+  const matchers: RegExp[] = plan === 'weekly'
+    ? [/\bweekly\b/i, /\bweek\b/i, /\bp1w\b/i, /\$rc_weekly/i]
+    : [/\bmonthly\b/i, /\bmonth\b/i, /\bp1m\b/i, /\$rc_monthly/i];
+
+  const expectedPackageType = plan === 'weekly' ? 'WEEKLY' : 'MONTHLY';
+
+  const matchedByType = availablePackages.find((pkg) => pkg.packageType === expectedPackageType);
+  if (matchedByType) {
+    return matchedByType;
+  }
+
+  const matchedByMetadata = availablePackages.find((pkg) => {
+    const searchable = [
+      pkg.identifier,
+      pkg.product.identifier,
+      pkg.product.title,
+      pkg.product.description,
+      pkg.product.subscriptionPeriod ?? '',
+    ].join(' ');
+
+    return matchers.some((matcher) => matcher.test(searchable));
+  });
+
+  return matchedByMetadata ?? null;
+}
+
+async function initializeRevenueCat(): Promise<boolean> {
+  if (purchasesConfigured) {
+    return true;
+  }
+
+  const apiKey = getRCToken();
+  if (!apiKey) {
+    console.error('RevenueCat API key not found');
+    return false;
+  }
+
+  const purchases = getPurchases();
+  if (!purchases) {
+    console.warn('RevenueCat SDK unavailable. Continuing without purchases support.');
+    return false;
+  }
+
+  try {
+    purchases.configure({ apiKey });
+    purchasesConfigured = true;
+    console.log('RevenueCat configured successfully');
+    return true;
+  } catch (error) {
+    console.error('Failed to configure RevenueCat:', error);
+    return false;
+  }
+}
+
+import { Platform } from 'react-native';
+
+const revenueCatSetupPromise = initializeRevenueCat();
 
 export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
   const queryClient = useQueryClient();
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const previousProStatus = useRef<boolean | null>(null);
 
   useEffect(() => {
-    const apiKey = getRCToken();
-    if (Platform.OS === 'web') {
-      setIsInitialized(true);
-      console.log('RevenueCat: Web mode - features will be simulated');
-      return;
-    }
+    let isMounted = true;
 
-    if (!apiKey) {
-      console.error('RevenueCat API key not found');
-      return;
-    }
+    const finishInitialization = async () => {
+      const configured = await revenueCatSetupPromise;
+      if (!isMounted) {
+        return;
+      }
 
-    const purchases = getPurchases();
-    if (!purchases) {
-      console.warn('RevenueCat not available. Skipping initialization.');
       setIsInitialized(true);
-      return;
-    }
+      console.log('RevenueCat initialization completed', { configured });
+    };
 
-    try {
-      purchases.configure({ apiKey });
-      setIsInitialized(true);
-      console.log('RevenueCat initialized successfully');
-    } catch (error) {
-      console.error('Failed to initialize RevenueCat:', error);
-    }
+    void finishInitialization();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
+  useEffect(() => {
+    const purchases = getPurchases();
+    if (!purchases || !isInitialized) {
+      return;
+    }
+
+    const handleCustomerInfoUpdate = (customerInfo: CustomerInfo) => {
+      console.log('RevenueCat customer info listener fired');
+      queryClient.setQueryData(['revenuecat-customer-info'], customerInfo);
+    };
+
+    purchases.addCustomerInfoUpdateListener(handleCustomerInfoUpdate);
+
+    return () => {
+      purchases.removeCustomerInfoUpdateListener(handleCustomerInfoUpdate);
+    };
+  }, [isInitialized, queryClient]);
 
   const customerInfoQuery = useQuery({
     queryKey: ['revenuecat-customer-info'],
     queryFn: async (): Promise<CustomerInfo | null> => {
-      if (Platform.OS === 'web') {
-        return null;
-      }
       const purchases = getPurchases();
       if (!purchases) {
         return null;
       }
+
       try {
         const customerInfo = await purchases.getCustomerInfo();
+        console.log('RevenueCat customer info fetched', {
+          activeEntitlements: Object.keys(customerInfo.entitlements.active ?? {}),
+        });
         return customerInfo;
       } catch (error) {
         console.error('Error fetching customer info:', error);
@@ -92,34 +170,26 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
     refetchInterval: 60000,
   });
 
-  useEffect(() => {
-    if (Platform.OS === 'web') return;
-
-    const customerInfo = customerInfoQuery.data;
-    if (!customerInfo) return;
-
-    const currentProStatus = customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
-
-    if (previousProStatus.current === null) {
-      previousProStatus.current = currentProStatus;
-      return;
-    }
-
-    previousProStatus.current = currentProStatus;
-  }, [customerInfoQuery.data]);
-
   const offeringsQuery = useQuery({
     queryKey: ['revenuecat-offerings'],
     queryFn: async (): Promise<PurchasesOfferings | null> => {
-      if (Platform.OS === 'web') {
-        return null;
-      }
       const purchases = getPurchases();
       if (!purchases) {
         return null;
       }
+
       try {
         const offerings = await purchases.getOfferings();
+        console.log('RevenueCat offerings fetched', {
+          currentOffering: offerings.current?.identifier ?? null,
+          packages: offerings.current?.availablePackages.map((pkg) => ({
+            identifier: pkg.identifier,
+            packageType: pkg.packageType,
+            productId: pkg.product.identifier,
+            priceString: pkg.product.priceString,
+            subscriptionPeriod: pkg.product.subscriptionPeriod,
+          })) ?? [],
+        });
         return offerings;
       } catch (error) {
         console.error('Error fetching offerings:', error);
@@ -129,39 +199,54 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
     enabled: isInitialized,
   });
 
-  const refreshRevenueCat = async () => {
-    if (Platform.OS === 'web') {
+  useEffect(() => {
+    const customerInfo = customerInfoQuery.data;
+    if (!customerInfo) {
       return;
     }
+
+    const currentProStatus = customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
+
+    if (previousProStatus.current === null) {
+      previousProStatus.current = currentProStatus;
+      return;
+    }
+
+    if (previousProStatus.current !== currentProStatus) {
+      console.log('RevenueCat pro status changed', {
+        previous: previousProStatus.current,
+        current: currentProStatus,
+      });
+    }
+
+    previousProStatus.current = currentProStatus;
+  }, [customerInfoQuery.data]);
+
+  const refreshRevenueCat = useCallback(async (): Promise<void> => {
     await Promise.all([
       customerInfoQuery.refetch(),
       offeringsQuery.refetch(),
     ]);
-  };
+  }, [customerInfoQuery, offeringsQuery]);
 
   const purchaseMutation = useMutation({
-    mutationFn: async (packageId: string) => {
-      if (Platform.OS === 'web') {
-        throw new Error('Purchases not available on web');
-      }
-
+    mutationFn: async (plan: RevenueCatPlan) => {
       const purchases = getPurchases();
       if (!purchases) {
-        throw new Error('Purchases not available');
+        throw new Error('Purchases are not available on this device.');
       }
 
-      const offerings = offeringsQuery.data;
-      if (!offerings?.current) {
-        throw new Error('No offerings available');
-      }
-
-      const pkg = offerings.current.availablePackages.find(
-        p => p.identifier === packageId
-      );
-
+      const pkg = resolvePackageByPlan(offeringsQuery.data, plan);
       if (!pkg) {
-        throw new Error('Package not found');
+        throw new Error(`The ${plan} subscription is not available right now.`);
       }
+
+      console.log('Starting RevenueCat purchase', {
+        requestedPlan: plan,
+        packageIdentifier: pkg.identifier,
+        packageType: pkg.packageType,
+        productIdentifier: pkg.product.identifier,
+      });
 
       try {
         const { customerInfo } = await purchases.purchasePackage(pkg);
@@ -170,69 +255,77 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
         if (error?.userCancelled) {
           throw new Error('Purchase cancelled');
         }
+
+        console.error('RevenueCat purchase failed', error);
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['revenuecat-customer-info'] });
+    onSuccess: (customerInfo) => {
+      queryClient.setQueryData(['revenuecat-customer-info'], customerInfo);
+      void queryClient.invalidateQueries({ queryKey: ['revenuecat-offerings'] });
     },
   });
 
   const restoreMutation = useMutation({
     mutationFn: async () => {
-      if (Platform.OS === 'web') {
-        throw new Error('Restore not available on web');
-      }
       const purchases = getPurchases();
       if (!purchases) {
-        throw new Error('Restore not available');
+        throw new Error('Restore is not available on this device.');
       }
+
       try {
         const customerInfo = await purchases.restorePurchases();
+        console.log('RevenueCat restore completed');
         return customerInfo;
       } catch (error) {
         console.error('Error restoring purchases:', error);
         throw error;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['revenuecat-customer-info'] });
+    onSuccess: (customerInfo) => {
+      queryClient.setQueryData(['revenuecat-customer-info'], customerInfo);
+      void queryClient.invalidateQueries({ queryKey: ['revenuecat-offerings'] });
     },
   });
 
-  const isPro = (): boolean => {
-    if (Platform.OS === 'web') {
+  const isPro = useMemo((): boolean => {
+    const customerInfo = customerInfoQuery.data;
+    if (!customerInfo) {
       return false;
     }
-    const customerInfo = customerInfoQuery.data;
-    if (!customerInfo) return false;
-    return customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
-  };
 
-  const getProExpirationDate = (): Date | null => {
-    if (Platform.OS === 'web') {
+    return customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
+  }, [customerInfoQuery.data]);
+
+  const getProExpirationDate = useCallback((): Date | null => {
+    const customerInfo = customerInfoQuery.data;
+    if (!customerInfo) {
       return null;
     }
-    const customerInfo = customerInfoQuery.data;
-    if (!customerInfo) return null;
+
     const entitlement = customerInfo.entitlements.active[ENTITLEMENT_ID];
-    if (!entitlement) return null;
-    return entitlement.expirationDate ? new Date(entitlement.expirationDate) : null;
-  };
+    if (!entitlement?.expirationDate) {
+      return null;
+    }
 
-  const purchase = async (packageId: string) => {
-    return purchaseMutation.mutateAsync(packageId);
-  };
+    return new Date(entitlement.expirationDate);
+  }, [customerInfoQuery.data]);
 
-  const restorePurchases = async () => {
+  const purchase = useCallback(async (plan: RevenueCatPlan) => {
+    return purchaseMutation.mutateAsync(plan);
+  }, [purchaseMutation]);
+
+  const restorePurchases = useCallback(async () => {
     return restoreMutation.mutateAsync();
-  };
+  }, [restoreMutation]);
 
-  return {
+  const value = useMemo(() => ({
     isInitialized,
-    isPro: isPro(),
+    isPro,
     customerInfo: customerInfoQuery.data,
     offerings: offeringsQuery.data,
+    weeklyPackage: resolvePackageByPlan(offeringsQuery.data, 'weekly'),
+    monthlyPackage: resolvePackageByPlan(offeringsQuery.data, 'monthly'),
     isLoadingCustomerInfo: customerInfoQuery.isLoading,
     isLoadingOfferings: offeringsQuery.isLoading,
     purchase,
@@ -243,5 +336,22 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
     purchaseError: purchaseMutation.error,
     restoreError: restoreMutation.error,
     getProExpirationDate,
-  };
+  }), [
+    customerInfoQuery.data,
+    customerInfoQuery.isLoading,
+    getProExpirationDate,
+    isInitialized,
+    isPro,
+    offeringsQuery.data,
+    offeringsQuery.isLoading,
+    purchase,
+    purchaseMutation.error,
+    purchaseMutation.isPending,
+    refreshRevenueCat,
+    restoreMutation.error,
+    restoreMutation.isPending,
+    restorePurchases,
+  ]);
+
+  return value;
 });

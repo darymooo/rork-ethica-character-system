@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, Alert, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, Alert, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { PurchasesPackage } from 'react-native-purchases';
 import { Check, Sparkles } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
@@ -16,15 +17,46 @@ const PREMIUM_FEATURES = [
   'Priority support',
 ];
 
+type PlanKey = 'weekly' | 'monthly';
+
+function stripTrialText(text: string): string {
+  return text
+    .replace(/\s*\(?[^)]*trial[^)]*\)?/gi, '')
+    .replace(/\b\d+\s*-?\s*day\b[^)]*/gi, '')
+    .replace(/free\s*trial/gi, '')
+    .replace(/\btrial\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function getPackagePrice(pkg: PurchasesPackage | null, fallback: string): string {
+  if (!pkg) {
+    return fallback;
+  }
+
+  const normalizedPrice = pkg.product.priceString
+    ?? pkg.product.pricePerMonthString
+    ?? pkg.product.pricePerWeekString
+    ?? fallback;
+
+  return stripTrialText(normalizedPrice);
+}
+
 export default function Paywall() {
   const router = useRouter();
   const systemColorScheme = useColorScheme();
   const { state } = useEthica();
+  const { width } = useWindowDimensions();
   const isDark = state.followSystemTheme ? systemColorScheme === 'dark' : state.darkMode;
   const theme = isDark ? colors.dark : colors.light;
+  const isTabletLayout = width >= 768;
+  const horizontalPadding = width < 380 ? 20 : isTabletLayout ? 32 : 24;
 
   const {
     offerings,
+    weeklyPackage,
+    monthlyPackage,
+    isPro,
     purchase,
     restorePurchases,
     refreshRevenueCat,
@@ -33,49 +65,81 @@ export default function Paywall() {
     isLoadingOfferings,
   } = useRevenueCat();
 
-  const [selectedPackage, setSelectedPackage] = useState<'weekly' | 'monthly'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<PlanKey>('monthly');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log('Paywall offerings:', offerings?.current?.availablePackages.map(pkg => ({
-      id: pkg.identifier,
-      priceString: pkg.product?.priceString,
-      introPrice: pkg.product?.introPrice?.priceString,
-      description: pkg.product?.description,
+    console.log('Paywall offerings snapshot', offerings?.current?.availablePackages.map((pkg) => ({
+      identifier: pkg.identifier,
+      packageType: pkg.packageType,
+      productIdentifier: pkg.product.identifier,
+      priceString: pkg.product.priceString,
+      introPrice: pkg.product.introPrice?.priceString,
+      subscriptionPeriod: pkg.product.subscriptionPeriod,
     })));
   }, [offerings]);
 
-  const weeklyPackage = offerings?.current?.availablePackages.find(
-    pkg => pkg.identifier === '$rc_weekly'
-  );
-  const monthlyPackage = offerings?.current?.availablePackages.find(
-    pkg => pkg.identifier === '$rc_monthly'
-  );
+  useEffect(() => {
+    if (!monthlyPackage && weeklyPackage) {
+      setSelectedPlan('weekly');
+    }
+
+    if (!weeklyPackage && monthlyPackage) {
+      setSelectedPlan('monthly');
+    }
+  }, [monthlyPackage, weeklyPackage]);
+
+  const selectedRevenueCatPackage = selectedPlan === 'monthly' ? monthlyPackage : weeklyPackage;
+  const weeklyPrice = getPackagePrice(weeklyPackage, '$2.99');
+  const monthlyPrice = getPackagePrice(monthlyPackage, '$9.99');
+
+  const weeklySavings = useMemo(() => {
+    if (!weeklyPackage || !monthlyPackage || weeklyPackage.product.price <= 0) {
+      return 0;
+    }
+
+    const monthlyEquivalent = weeklyPackage.product.price * 4;
+    const savings = Math.round((1 - (monthlyPackage.product.price / monthlyEquivalent)) * 100);
+    return savings > 0 ? savings : 0;
+  }, [monthlyPackage, weeklyPackage]);
+
+  const missingPlans = useMemo(() => {
+    const plans: string[] = [];
+
+    if (!weeklyPackage) {
+      plans.push('weekly');
+    }
+
+    if (!monthlyPackage) {
+      plans.push('monthly');
+    }
+
+    return plans;
+  }, [monthlyPackage, weeklyPackage]);
 
   const handleClose = () => {
     router.replace('/virtue-selection');
   };
 
   const handlePurchase = async () => {
-    if (Platform.OS === 'web') {
+    if (!selectedRevenueCatPackage) {
       Alert.alert(
-        'Not Available',
-        'Purchases are not available on the web version. Please use the mobile app to upgrade to Pro.'
+        'Subscription Unavailable',
+        `The ${selectedPlan} subscription is not available right now. Please refresh and try again.`
       );
       return;
     }
 
     try {
-      const packageId = selectedPackage === 'weekly' ? '$rc_weekly' : '$rc_monthly';
-      await purchase(packageId);
+      await purchase(selectedPlan);
       Alert.alert(
         'Success!',
         'Welcome to Ethica Pro! You now have access to all premium features.',
         [{ text: 'Continue', onPress: () => router.replace('/virtue-selection') }]
       );
     } catch (error: any) {
-      if (error.message !== 'Purchase cancelled') {
-        Alert.alert('Purchase Failed', error.message || 'Something went wrong. Please try again.');
+      if (error?.message !== 'Purchase cancelled') {
+        Alert.alert('Purchase Failed', error?.message || 'Something went wrong. Please try again.');
       }
     }
   };
@@ -84,7 +148,7 @@ export default function Paywall() {
     setIsRefreshing(true);
     try {
       await refreshRevenueCat();
-      Alert.alert('Refreshed', 'RevenueCat data has been refreshed.');
+      Alert.alert('Refreshed', 'RevenueCat products have been refreshed.');
     } catch (error: any) {
       Alert.alert('Refresh Failed', error?.message || 'Could not refresh RevenueCat data.');
     } finally {
@@ -93,207 +157,209 @@ export default function Paywall() {
   };
 
   const handleRestore = async () => {
-    if (Platform.OS === 'web') {
-      Alert.alert(
-        'Not Available',
-        'Restore purchases is not available on the web version.'
-      );
-      return;
-    }
-
     try {
       await restorePurchases();
       Alert.alert(
         'Restore Complete',
         'Your purchases have been restored.',
-        [{ text: 'OK', onPress: () => router.back() }]
+        [{ text: 'OK', onPress: () => router.replace('/virtue-selection') }]
       );
     } catch (error: any) {
-      Alert.alert('Restore Failed', error.message || 'Could not restore purchases. Please try again.');
+      Alert.alert('Restore Failed', error?.message || 'Could not restore purchases. Please try again.');
     }
   };
 
-  const stripTrialText = (text: string) =>
-    text
-      .replace(/\s*\(?[^)]*trial[^)]*\)?/gi, '')
-      .replace(/\b\d+\s*-?\s*day\b[^)]*/gi, '')
-      .replace(/free\s*trial/gi, '')
-      .replace(/\btrial\b/gi, '')
-      .replace(/\s{2,}/g, ' ')
-      .trim();
-
-  const sanitizePrice = (price: string) => stripTrialText(price);
-
-
-  const weeklyPrice = sanitizePrice(weeklyPackage?.product?.priceString || '$2.99');
-  const monthlyPrice = sanitizePrice(monthlyPackage?.product?.priceString || '$9.99');
-
-  const weeklySavings = weeklyPackage && monthlyPackage 
-    ? Math.round((1 - (monthlyPackage.product.price / (weeklyPackage.product.price * 4))) * 100)
-    : 25;
+  const activePriceLabel = selectedPlan === 'monthly' ? `${monthlyPrice}/month` : `${weeklyPrice}/week`;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}> 
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingHorizontal: horizontalPadding }]}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.header}>
-            <View style={[styles.iconContainer, { backgroundColor: theme.accent + '20' }]}>
-              <Sparkles size={32} color={theme.accent} strokeWidth={1.5} />
+          <View style={[styles.contentShell, { maxWidth: isTabletLayout ? 860 : 560 }]}>
+            <View style={styles.header}>
+              <View style={[styles.iconContainer, { backgroundColor: theme.accent + '20' }]}> 
+                <Sparkles size={32} color={theme.accent} strokeWidth={1.5} />
+              </View>
+              <Text style={[styles.title, { color: theme.text }]}>
+                Upgrade to Ethica Pro
+              </Text>
+              <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+                Unlock the full potential of your character development journey
+              </Text>
             </View>
-            <Text style={[styles.title, { color: theme.text }]}>
-              Upgrade to Ethica Pro
-            </Text>
-            <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-              Unlock the full potential of your character development journey
-            </Text>
-          </View>
 
-          <View style={styles.featuresContainer}>
-            {PREMIUM_FEATURES.map((feature, index) => (
-              <View key={index} style={styles.featureRow}>
-                <View style={[styles.checkContainer, { backgroundColor: theme.accent + '20' }]}>
-                  <Check size={16} color={theme.accent} strokeWidth={2.5} />
+            <View style={styles.featuresContainer}>
+              {PREMIUM_FEATURES.map((feature) => (
+                <View key={feature} style={styles.featureRow}>
+                  <View style={[styles.checkContainer, { backgroundColor: theme.accent + '20' }]}> 
+                    <Check size={16} color={theme.accent} strokeWidth={2.5} />
+                  </View>
+                  <Text style={[styles.featureText, { color: theme.text }]}> 
+                    {feature}
+                  </Text>
                 </View>
-                <Text style={[styles.featureText, { color: theme.text }]}>
-                  {feature}
+              ))}
+            </View>
+
+            {missingPlans.length > 0 && !isLoadingOfferings ? (
+              <View style={[styles.statusCard, { backgroundColor: theme.surface, borderColor: theme.border }]}> 
+                <Text style={[styles.statusTitle, { color: theme.text }]}>Subscription setup needs attention</Text>
+                <Text style={[styles.statusText, { color: theme.textSecondary }]}> 
+                  Missing {missingPlans.join(' and ')} package{missingPlans.length > 1 ? 's' : ''} from the current RevenueCat offering.
                 </Text>
               </View>
-            ))}
-          </View>
+            ) : null}
 
-          {isLoadingOfferings ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={theme.accent} />
-              <Text style={[styles.loadingText, { color: theme.textSecondary }]}>
-                Loading subscription options...
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.pricingContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.pricingCard,
-                  {
-                    backgroundColor: theme.surface,
-                    borderColor: selectedPackage === 'monthly' ? theme.accent : theme.border,
-                    borderWidth: selectedPackage === 'monthly' ? 2 : 1,
-                  },
-                ]}
-                onPress={() => setSelectedPackage('monthly')}
-                activeOpacity={0.7}
-                testID="monthly-package"
-              >
-                {weeklySavings > 0 && (
-                  <View style={[styles.badge, { backgroundColor: theme.accent }]}>
-                    <Text style={[styles.badgeText, { color: '#FFFFFF' }]}>
-                      Best Value
+            {isPro ? (
+              <View style={[styles.statusCard, { backgroundColor: theme.surface, borderColor: theme.accent }]}> 
+                <Text style={[styles.statusTitle, { color: theme.text }]}>Ethica Pro is active</Text>
+                <Text style={[styles.statusText, { color: theme.textSecondary }]}> 
+                  Your premium access is already unlocked on this device.
+                </Text>
+              </View>
+            ) : null}
+
+            {isLoadingOfferings ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={theme.accent} />
+                <Text style={[styles.loadingText, { color: theme.textSecondary }]}> 
+                  Loading subscription options...
+                </Text>
+              </View>
+            ) : (
+              <View style={[styles.pricingContainer, isTabletLayout && styles.pricingContainerTablet]}>
+                <TouchableOpacity
+                  style={[
+                    styles.pricingCard,
+                    isTabletLayout && styles.pricingCardTablet,
+                    {
+                      backgroundColor: theme.surface,
+                      borderColor: selectedPlan === 'monthly' ? theme.accent : theme.border,
+                      borderWidth: selectedPlan === 'monthly' ? 2 : 1,
+                    },
+                  ]}
+                  onPress={() => setSelectedPlan('monthly')}
+                  activeOpacity={0.7}
+                  testID="monthly-package"
+                >
+                  {weeklySavings > 0 ? (
+                    <View style={[styles.badge, { backgroundColor: theme.accent }]}> 
+                      <Text style={styles.badgeText}>Best Value</Text>
+                    </View>
+                  ) : null}
+                  <View style={styles.pricingHeader}>
+                    <Text style={[styles.planName, { color: theme.text }]}>Monthly</Text>
+                    <Text style={[styles.planPrice, { color: theme.text }]}> 
+                      {monthlyPrice}
+                      <Text style={[styles.planPeriod, { color: theme.textSecondary }]}>/month</Text>
                     </Text>
                   </View>
-                )}
-                <View style={styles.pricingHeader}>
-                  <Text style={[styles.planName, { color: theme.text }]}>Monthly</Text>
-                  <Text style={[styles.planPrice, { color: theme.text }]}>
-                    {monthlyPrice}<Text style={[styles.planPeriod, { color: theme.textSecondary }]}>/month</Text>
+                  <Text style={[styles.planDetail, { color: theme.textSecondary }]}> 
+                    Billed monthly, cancel anytime
                   </Text>
-                </View>
-                <Text style={[styles.planDetail, { color: theme.textSecondary }]}>
-                  Billed monthly, cancel anytime
-                </Text>
-              </TouchableOpacity>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.pricingCard,
-                  {
-                    backgroundColor: theme.surface,
-                    borderColor: selectedPackage === 'weekly' ? theme.accent : theme.border,
-                    borderWidth: selectedPackage === 'weekly' ? 2 : 1,
-                  },
-                ]}
-                onPress={() => setSelectedPackage('weekly')}
-                activeOpacity={0.7}
-                testID="weekly-package"
-              >
-                <View style={styles.pricingHeader}>
-                  <Text style={[styles.planName, { color: theme.text }]}>Weekly</Text>
-                  <Text style={[styles.planPrice, { color: theme.text }]}>
-                    {weeklyPrice}<Text style={[styles.planPeriod, { color: theme.textSecondary }]}>/week</Text>
+                <TouchableOpacity
+                  style={[
+                    styles.pricingCard,
+                    isTabletLayout && styles.pricingCardTablet,
+                    {
+                      backgroundColor: theme.surface,
+                      borderColor: selectedPlan === 'weekly' ? theme.accent : theme.border,
+                      borderWidth: selectedPlan === 'weekly' ? 2 : 1,
+                    },
+                  ]}
+                  onPress={() => setSelectedPlan('weekly')}
+                  activeOpacity={0.7}
+                  testID="weekly-package"
+                >
+                  <View style={styles.pricingHeader}>
+                    <Text style={[styles.planName, { color: theme.text }]}>Weekly</Text>
+                    <Text style={[styles.planPrice, { color: theme.text }]}> 
+                      {weeklyPrice}
+                      <Text style={[styles.planPeriod, { color: theme.textSecondary }]}>/week</Text>
+                    </Text>
+                  </View>
+                  <Text style={[styles.planDetail, { color: theme.textSecondary }]}> 
+                    Billed weekly, cancel anytime
                   </Text>
-                </View>
-                <Text style={[styles.planDetail, { color: theme.textSecondary }]}>
-                  Billed weekly, cancel anytime
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
         </ScrollView>
 
-        <View style={[styles.footer, { borderTopColor: theme.border }]}>
-          <Text style={[styles.noPaymentText, { color: theme.textSecondary }]}>
-            Cancel anytime. No free trials.
-          </Text>
-          <TouchableOpacity
-            style={[styles.subscribeButton, { backgroundColor: theme.accent }]}
-            onPress={handlePurchase}
-            disabled={isPurchasing || isLoadingOfferings}
-            activeOpacity={0.7}
-            testID="subscribe-button"
-          >
-            {isPurchasing ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text style={styles.subscribeButtonText}>
-                Subscribe Now
-              </Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.skipButton}
-            onPress={handleClose}
-            activeOpacity={0.7}
-            testID="skip-button"
-          >
-            <Text style={[styles.skipButtonText, { color: theme.textSecondary }]}>
-              Skip and continue to app
+        <View style={[styles.footerOuter, { borderTopColor: theme.border }]}> 
+          <View style={[styles.footerInner, { maxWidth: isTabletLayout ? 860 : 560, paddingHorizontal: horizontalPadding }]}> 
+            <Text style={[styles.noPaymentText, { color: theme.textSecondary }]}> 
+              Cancel anytime. No free trials.
             </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.subscribeButton,
+                { backgroundColor: selectedRevenueCatPackage && !isPro ? theme.accent : theme.border },
+              ]}
+              onPress={handlePurchase}
+              disabled={isPurchasing || isLoadingOfferings || !selectedRevenueCatPackage || isPro}
+              activeOpacity={0.7}
+              testID="subscribe-button"
+            >
+              {isPurchasing ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={styles.subscribeButtonText}>
+                  {isPro ? 'You already have Pro' : `Subscribe to ${selectedPlan === 'monthly' ? 'Monthly' : 'Weekly'}`}
+                </Text>
+              )}
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.restoreButton}
-            onPress={handleRestore}
-            disabled={isRestoring}
-            activeOpacity={0.7}
-            testID="restore-button"
-          >
-            <Text style={[styles.restoreButtonText, { color: theme.textTertiary }]}>
-              {isRestoring ? 'Restoring...' : 'Restore Purchases'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.refreshButton}
-            onPress={handleRefresh}
-            disabled={isRefreshing || isLoadingOfferings}
-            activeOpacity={0.7}
-            testID="refresh-revenuecat-button"
-          >
-            {isRefreshing ? (
-              <ActivityIndicator size="small" color={theme.textTertiary} />
-            ) : (
-              <Text style={[styles.restoreButtonText, { color: theme.textTertiary }]}>
-                Refresh RevenueCat
+            <TouchableOpacity
+              style={styles.skipButton}
+              onPress={handleClose}
+              activeOpacity={0.7}
+              testID="skip-button"
+            >
+              <Text style={[styles.skipButtonText, { color: theme.textSecondary }]}> 
+                Skip and continue to app
               </Text>
-            )}
-          </TouchableOpacity>
+            </TouchableOpacity>
 
-          <Text style={[styles.disclaimer, { color: theme.textTertiary }]}>
-            {selectedPackage === 'monthly' ? monthlyPrice : weeklyPrice}{selectedPackage === 'monthly' ? '/month' : '/week'}. Cancel anytime.
-          </Text>
+            <TouchableOpacity
+              style={styles.restoreButton}
+              onPress={handleRestore}
+              disabled={isRestoring}
+              activeOpacity={0.7}
+              testID="restore-button"
+            >
+              <Text style={[styles.restoreButtonText, { color: theme.textTertiary }]}> 
+                {isRestoring ? 'Restoring...' : 'Restore Purchases'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.refreshButton}
+              onPress={handleRefresh}
+              disabled={isRefreshing || isLoadingOfferings}
+              activeOpacity={0.7}
+              testID="refresh-revenuecat-button"
+            >
+              {isRefreshing ? (
+                <ActivityIndicator size="small" color={theme.textTertiary} />
+              ) : (
+                <Text style={[styles.restoreButtonText, { color: theme.textTertiary }]}> 
+                  Refresh RevenueCat
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            <Text style={[styles.disclaimer, { color: theme.textTertiary }]}> 
+              {activePriceLabel}. Cancel anytime.
+            </Text>
+          </View>
         </View>
       </SafeAreaView>
     </View>
@@ -307,23 +373,20 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  noPaymentText: {
-    ...typography.sans.medium,
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 8,
-  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 32,
-    paddingTop: 32,
-    paddingBottom: 32,
+    paddingTop: 28,
+    paddingBottom: 24,
+  },
+  contentShell: {
+    width: '100%',
+    alignSelf: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 32,
     gap: 16,
   },
   iconContainer: {
@@ -343,10 +406,11 @@ const styles = StyleSheet.create({
     fontSize: sizes.body,
     textAlign: 'center',
     lineHeight: 22,
+    maxWidth: 520,
   },
   featuresContainer: {
     gap: 16,
-    marginBottom: 40,
+    marginBottom: 24,
   },
   featureRow: {
     flexDirection: 'row',
@@ -365,6 +429,22 @@ const styles = StyleSheet.create({
     fontSize: sizes.body,
     flex: 1,
   },
+  statusCard: {
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 20,
+    gap: 8,
+  },
+  statusTitle: {
+    ...typography.sans.semibold,
+    fontSize: sizes.label,
+  },
+  statusText: {
+    ...typography.sans.regular,
+    fontSize: sizes.body,
+    lineHeight: 22,
+  },
   loadingContainer: {
     alignItems: 'center',
     paddingVertical: 40,
@@ -376,31 +456,38 @@ const styles = StyleSheet.create({
   },
   pricingContainer: {
     gap: 16,
-    marginBottom: 24,
+  },
+  pricingContainerTablet: {
+    flexDirection: 'row',
   },
   pricingCard: {
     padding: 20,
-    borderRadius: 12,
+    borderRadius: 18,
     position: 'relative',
+  },
+  pricingCardTablet: {
+    flex: 1,
   },
   badge: {
     position: 'absolute',
-    top: -8,
-    right: 20,
+    top: -10,
+    right: 16,
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 999,
   },
   badgeText: {
     ...typography.sans.semibold,
     fontSize: 12,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
+    color: '#FFFFFF',
   },
   pricingHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
+    gap: 12,
     marginBottom: 8,
   },
   planName: {
@@ -419,16 +506,24 @@ const styles = StyleSheet.create({
     ...typography.sans.regular,
     fontSize: sizes.body,
   },
-  footer: {
-    paddingHorizontal: 32,
-    paddingTop: 20,
-    paddingBottom: 20,
+  footerOuter: {
     borderTopWidth: 1,
+    paddingTop: 18,
+    paddingBottom: 14,
+  },
+  footerInner: {
+    width: '100%',
+    alignSelf: 'center',
     gap: 12,
+  },
+  noPaymentText: {
+    ...typography.sans.medium,
+    fontSize: 14,
+    textAlign: 'center',
   },
   subscribeButton: {
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: 'center',
   },
   subscribeButtonText: {
@@ -437,7 +532,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   skipButton: {
-    paddingVertical: 14,
+    paddingVertical: 12,
     alignItems: 'center',
   },
   skipButtonText: {
@@ -445,11 +540,11 @@ const styles = StyleSheet.create({
     fontSize: sizes.body,
   },
   restoreButton: {
-    paddingVertical: 12,
+    paddingVertical: 10,
     alignItems: 'center',
   },
   refreshButton: {
-    paddingVertical: 10,
+    paddingVertical: 8,
     alignItems: 'center',
   },
   restoreButtonText: {
