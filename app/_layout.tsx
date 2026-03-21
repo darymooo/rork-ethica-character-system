@@ -7,6 +7,11 @@ import { EthicaProvider, useEthica } from "@/contexts/EthicaContext";
 import { RevenueCatProvider } from "@/contexts/RevenueCatContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
+SplashScreen.setOptions({
+  duration: 220,
+  fade: true,
+});
+
 const prepareSplash = async () => {
   try {
     await SplashScreen.preventAutoHideAsync();
@@ -28,28 +33,10 @@ function RootLayoutNav() {
   }, [isLoading]);
 
   useEffect(() => {
-    const forceHide = async () => {
-      try {
-        console.warn("RootLayoutNav: forcing splash hide after timeout");
-        await SplashScreen.hideAsync();
-        setHasHiddenSplash(true);
-      } catch (error) {
-        console.error("Failed to force hide splash:", error);
-      }
-    };
-
-    const timeout = setTimeout(() => {
-      void forceHide();
-    }, 4000);
-
-    return () => clearTimeout(timeout);
-  }, []);
-
-  useEffect(() => {
     const hideSplash = async () => {
       try {
         if (!isLoading && !hasHiddenSplash) {
-          console.log("RootLayoutNav: hiding splash (data ready)");
+          console.log("RootLayoutNav: hiding splash after app finished loading");
           await SplashScreen.hideAsync();
           setHasHiddenSplash(true);
         }
