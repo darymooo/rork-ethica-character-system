@@ -372,24 +372,29 @@ export default function Paywall() {
             <Text style={[styles.disclaimer, { color: theme.textTertiary }]}> 
               {activePriceLabel}. Cancel anytime.
             </Text>
-            <Text style={[styles.legalText, { color: theme.textTertiary }]}> 
-              By subscribing, you agree to our{' '}
-              <Text
-                style={[styles.legalLink, { color: theme.accent }]}
-                onPress={openPoliciesPage('terms')}
-                testID="terms-of-use-link"
-              >
-                Terms of Use
-              </Text>
-              {' '}|{' '}
-              <Text
-                style={[styles.legalLink, { color: theme.accent }]}
-                onPress={openPoliciesPage('privacy')}
-                testID="privacy-policy-link"
-              >
-                Privacy Policy
-              </Text>
-            </Text>
+            <View
+              style={[styles.legalContainer, { backgroundColor: theme.surface, borderColor: theme.borderLight }]}
+              testID="paywall-legal-footer"
+            >
+              <Text style={[styles.legalText, { color: theme.textTertiary }]}>By subscribing, you agree to our</Text>
+              <View style={styles.legalLinksRow}>
+                <TouchableOpacity
+                  onPress={openPoliciesPage('terms')}
+                  activeOpacity={0.7}
+                  testID="terms-of-use-link"
+                >
+                  <Text style={[styles.legalLink, { color: theme.accent }]}>Terms of Use</Text>
+                </TouchableOpacity>
+                <Text style={[styles.legalDivider, { color: theme.textTertiary }]}>|</Text>
+                <TouchableOpacity
+                  onPress={openPoliciesPage('privacy')}
+                  activeOpacity={0.7}
+                  testID="privacy-policy-link"
+                >
+                  <Text style={[styles.legalLink, { color: theme.accent }]}>Privacy Policy</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         </View>
       </SafeAreaView>
@@ -595,15 +600,35 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 16,
   },
+  legalContainer: {
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    gap: 6,
+  },
   legalText: {
     ...typography.sans.regular,
     fontSize: 12,
     textAlign: 'center',
     lineHeight: 18,
-    paddingHorizontal: 12,
+  },
+  legalLinksRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    columnGap: 8,
+    rowGap: 4,
+  },
+  legalDivider: {
+    ...typography.sans.regular,
+    fontSize: 12,
   },
   legalLink: {
     ...typography.sans.semibold,
+    fontSize: 12,
     textDecorationLine: 'underline',
   },
 });
