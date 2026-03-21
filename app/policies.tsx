@@ -1,17 +1,92 @@
+import React from 'react';
 import { useEthica } from '@/contexts/EthicaContext';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
 
+type PolicySectionKey = 'privacy' | 'terms';
+
+interface PolicySection {
+  key: PolicySectionKey;
+  title: string;
+  lastUpdated: string;
+  content: React.ReactNode;
+}
+
 export default function Policies() {
   const { state } = useEthica();
   const router = useRouter();
+  const params = useLocalSearchParams<{ section?: string }>();
   const systemColorScheme = useColorScheme();
   const isDark = state.followSystemTheme ? systemColorScheme === 'dark' : state.darkMode;
   const theme = isDark ? colors.dark : colors.light;
+  const selectedSection: PolicySectionKey = params.section === 'terms' ? 'terms' : 'privacy';
+
+  const sections: PolicySection[] = [
+    {
+      key: 'privacy',
+      title: 'Privacy Policy',
+      lastUpdated: 'Last updated: January 2026',
+      content: (
+        <View style={styles.policyContent}>
+          <Text style={[styles.heading, { color: theme.text }]}>Data Collection</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>Ethica stores all your data locally on your device. Your virtue practice records, observations, and settings remain entirely on your device. We do not collect or store any personal information on external servers.</Text>
+
+          <Text style={[styles.heading, { color: theme.text }]}>What We Store Locally</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>• Your selected virtues and practice history{`\n`}• Daily observations and notes{`\n`}• App preferences and settings{`\n`}• Streak and progress data</Text>
+
+          <Text style={[styles.heading, { color: theme.text }]}>In-App Purchases</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>We use RevenueCat to process in-app purchases and subscriptions. RevenueCat may collect limited transaction data (subscription status, purchase receipts) to manage your premium features. This data is handled according to RevenueCat&apos;s privacy policy. We do not have access to your payment information.</Text>
+
+          <Text style={[styles.heading, { color: theme.text }]}>Data Sharing</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>We do not share, sell, or transfer your personal data to any third parties beyond what is necessary for processing subscriptions via RevenueCat. Your character development journey remains private.</Text>
+
+          <Text style={[styles.heading, { color: theme.text }]}>Data Export & Deletion</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>You can export your data at any time through the Settings menu. You can also reset all data, which permanently deletes all stored information from your device.</Text>
+
+          <Text style={[styles.heading, { color: theme.text }]}>Analytics</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>We do not use any third-party analytics services. All statistics and insights are calculated locally on your device.</Text>
+        </View>
+      ),
+    },
+    {
+      key: 'terms',
+      title: 'Terms of Use',
+      lastUpdated: 'Last updated: January 2026',
+      content: (
+        <View style={styles.policyContent}>
+          <Text style={[styles.heading, { color: theme.text }]}>Acceptance of Terms</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>By using Ethica, you agree to these terms. The app is provided for personal character development and self-improvement purposes.</Text>
+
+          <Text style={[styles.heading, { color: theme.text }]}>Use of the App</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>Ethica is designed to help you practice Benjamin Franklin&apos;s method of character formation. The app is intended for personal use and self-reflection.</Text>
+
+          <Text style={[styles.heading, { color: theme.text }]}>Subscriptions</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>Ethica Pro subscriptions automatically renew unless cancelled at least 24 hours before the end of the current billing period. Payment is charged to your Apple ID account at confirmation of purchase. You can manage and cancel your subscription through your App Store account settings.</Text>
+
+          <Text style={[styles.heading, { color: theme.text }]}>No Medical Advice</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>This app is not a substitute for professional medical, psychological, or therapeutic advice. If you are experiencing mental health challenges, please consult a qualified professional.</Text>
+
+          <Text style={[styles.heading, { color: theme.text }]}>User Responsibility</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>You are responsible for maintaining the security of your device and any data stored within the app. We recommend regular backups using the export feature.</Text>
+
+          <Text style={[styles.heading, { color: theme.text }]}>Disclaimer</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>The app is provided &quot;as is&quot; without warranties of any kind. We are not liable for any loss of data or any indirect, incidental, or consequential damages arising from your use of the app.</Text>
+
+          <Text style={[styles.heading, { color: theme.text }]}>Changes to Terms</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>We may update these terms from time to time. Continued use of the app after changes constitutes acceptance of the new terms.</Text>
+
+          <Text style={[styles.heading, { color: theme.text }]}>Contact</Text>
+          <Text style={[styles.paragraph, { color: theme.textSecondary }]}>If you have questions about these policies, please reach out through the app store listing or our support channels.</Text>
+        </View>
+      ),
+    },
+  ];
+
+  const orderedSections = selectedSection === 'terms' ? [sections[1], sections[0]] : sections;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
@@ -32,9 +107,7 @@ export default function Policies() {
         >
           <ArrowLeft size={24} color={theme.text} strokeWidth={1.5} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.text }]}>
-          Privacy & Terms
-        </Text>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>Privacy & Terms</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -43,122 +116,65 @@ export default function Policies() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Privacy Policy
-          </Text>
-          <Text style={[styles.lastUpdated, { color: theme.textTertiary }]}>
-            Last updated: January 2026
-          </Text>
+        <View style={styles.tabRow}>
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              {
+                backgroundColor: selectedSection === 'privacy' ? theme.text : theme.surface,
+                borderColor: theme.border,
+              },
+            ]}
+            onPress={() => router.replace({ pathname: '/policies', params: { section: 'privacy' } })}
+            activeOpacity={0.7}
+            testID="privacy-tab-button"
+          >
+            <Text
+              style={[
+                styles.tabButtonText,
+                { color: selectedSection === 'privacy' ? theme.background : theme.textSecondary },
+              ]}
+            >
+              Privacy Policy
+            </Text>
+          </TouchableOpacity>
 
-          <View style={styles.policyContent}>
-            <Text style={[styles.heading, { color: theme.text }]}>
-              Data Collection
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              {
+                backgroundColor: selectedSection === 'terms' ? theme.text : theme.surface,
+                borderColor: theme.border,
+              },
+            ]}
+            onPress={() => router.replace({ pathname: '/policies', params: { section: 'terms' } })}
+            activeOpacity={0.7}
+            testID="terms-tab-button"
+          >
+            <Text
+              style={[
+                styles.tabButtonText,
+                { color: selectedSection === 'terms' ? theme.background : theme.textSecondary },
+              ]}
+            >
+              Terms of Use
             </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              Ethica stores all your data locally on your device. Your virtue practice records, observations, and settings remain entirely on your device. We do not collect or store any personal information on external servers.
-            </Text>
-
-            <Text style={[styles.heading, { color: theme.text }]}>
-              What We Store Locally
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              • Your selected virtues and practice history{'\n'}
-              • Daily observations and notes{'\n'}
-              • App preferences and settings{'\n'}
-              • Streak and progress data
-            </Text>
-
-            <Text style={[styles.heading, { color: theme.text }]}>\n              In-App Purchases
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              We use RevenueCat to process in-app purchases and subscriptions. RevenueCat may collect limited transaction data (subscription status, purchase receipts) to manage your premium features. This data is handled according to RevenueCat&apos;s privacy policy. We do not have access to your payment information.
-            </Text>
-
-            <Text style={[styles.heading, { color: theme.text }]}>
-              Data Sharing
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              We do not share, sell, or transfer your personal data to any third parties beyond what is necessary for processing subscriptions (via RevenueCat). Your character development journey remains private.
-            </Text>
-
-            <Text style={[styles.heading, { color: theme.text }]}>
-              Data Export & Deletion
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              You can export your data at any time through the Settings menu. You can also reset all data, which permanently deletes all stored information from your device.
-            </Text>
-
-            <Text style={[styles.heading, { color: theme.text }]}>
-              Analytics
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              We do not use any third-party analytics services. All statistics and insights are calculated locally on your device.
-            </Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
-        <View style={[styles.divider, { backgroundColor: theme.borderLight }]} />
+        {orderedSections.map((section, index) => (
+          <View key={section.key}>
+            <View style={styles.section} testID={`${section.key}-section`}>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>{section.title}</Text>
+              <Text style={[styles.lastUpdated, { color: theme.textTertiary }]}>{section.lastUpdated}</Text>
+              {section.content}
+            </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Terms of Service
-          </Text>
-          <Text style={[styles.lastUpdated, { color: theme.textTertiary }]}>
-            Last updated: January 2026
-          </Text>
-
-          <View style={styles.policyContent}>
-            <Text style={[styles.heading, { color: theme.text }]}>
-              Acceptance of Terms
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              By using Ethica, you agree to these terms. The app is provided for personal character development and self-improvement purposes.
-            </Text>
-
-            <Text style={[styles.heading, { color: theme.text }]}>
-              Use of the App
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              Ethica is designed to help you practice Benjamin Franklin&apos;s method of character formation. The app is intended for personal use and self-reflection.
-            </Text>
-
-            <Text style={[styles.heading, { color: theme.text }]}>
-              No Medical Advice
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              This app is not a substitute for professional medical, psychological, or therapeutic advice. If you are experiencing mental health challenges, please consult a qualified professional.
-            </Text>
-
-            <Text style={[styles.heading, { color: theme.text }]}>
-              User Responsibility
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              You are responsible for maintaining the security of your device and any data stored within the app. We recommend regular backups using the export feature.
-            </Text>
-
-            <Text style={[styles.heading, { color: theme.text }]}>
-              Disclaimer
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              The app is provided &quot;as is&quot; without warranties of any kind. We are not liable for any loss of data or any indirect, incidental, or consequential damages arising from your use of the app.
-            </Text>
-
-            <Text style={[styles.heading, { color: theme.text }]}>
-              Changes to Terms
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              We may update these terms from time to time. Continued use of the app after changes constitutes acceptance of the new terms.
-            </Text>
-
-            <Text style={[styles.heading, { color: theme.text }]}>
-              Contact
-            </Text>
-            <Text style={[styles.paragraph, { color: theme.textSecondary }]}>
-              If you have questions about these policies, please reach out through the app store listing or our support channels.
-            </Text>
+            {index < orderedSections.length - 1 ? (
+              <View style={[styles.divider, { backgroundColor: theme.borderLight }]} />
+            ) : null}
           </View>
-        </View>
+        ))}
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
@@ -193,6 +209,23 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 24,
     paddingTop: 8,
+  },
+  tabRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  tabButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  tabButtonText: {
+    ...typography.sans.semibold,
+    fontSize: sizes.body,
   },
   section: {
     paddingVertical: 24,

@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, Alert, ActivityIndicator, useWindowDimensions } from 'react-native';
+import type { GestureResponderEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -169,6 +170,12 @@ export default function Paywall() {
     }
   };
 
+  const openPoliciesPage = (section: 'privacy' | 'terms') => (event: GestureResponderEvent) => {
+    event.preventDefault();
+    console.log('Opening policies page from paywall', { section });
+    router.push({ pathname: '/policies', params: { section } });
+  };
+
   const activePriceLabel = selectedPlan === 'monthly' ? `${monthlyPrice}/month` : `${weeklyPrice}/week`;
 
   return (
@@ -259,7 +266,10 @@ export default function Paywall() {
                     </Text>
                   </View>
                   <Text style={[styles.planDetail, { color: theme.textSecondary }]}> 
-                    Billed monthly, cancel anytime
+                    1 month subscription • {monthlyPrice} billed every month
+                  </Text>
+                  <Text style={[styles.planBillingCycle, { color: theme.textTertiary }]}> 
+                    Auto-renewing monthly billing cycle. Cancel anytime.
                   </Text>
                 </TouchableOpacity>
 
@@ -285,7 +295,10 @@ export default function Paywall() {
                     </Text>
                   </View>
                   <Text style={[styles.planDetail, { color: theme.textSecondary }]}> 
-                    Billed weekly, cancel anytime
+                    1 week subscription • {weeklyPrice} billed every week
+                  </Text>
+                  <Text style={[styles.planBillingCycle, { color: theme.textTertiary }]}> 
+                    Auto-renewing weekly billing cycle. Cancel anytime.
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -358,6 +371,24 @@ export default function Paywall() {
 
             <Text style={[styles.disclaimer, { color: theme.textTertiary }]}> 
               {activePriceLabel}. Cancel anytime.
+            </Text>
+            <Text style={[styles.legalText, { color: theme.textTertiary }]}> 
+              By subscribing, you agree to our{' '}
+              <Text
+                style={[styles.legalLink, { color: theme.accent }]}
+                onPress={openPoliciesPage('terms')}
+                testID="terms-of-use-link"
+              >
+                Terms of Use
+              </Text>
+              {' '}|{' '}
+              <Text
+                style={[styles.legalLink, { color: theme.accent }]}
+                onPress={openPoliciesPage('privacy')}
+                testID="privacy-policy-link"
+              >
+                Privacy Policy
+              </Text>
             </Text>
           </View>
         </View>
@@ -505,6 +536,13 @@ const styles = StyleSheet.create({
   planDetail: {
     ...typography.sans.regular,
     fontSize: sizes.body,
+    lineHeight: 22,
+  },
+  planBillingCycle: {
+    ...typography.sans.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 6,
   },
   footerOuter: {
     borderTopWidth: 1,
@@ -556,5 +594,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     lineHeight: 16,
+  },
+  legalText: {
+    ...typography.sans.regular,
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 18,
+    paddingHorizontal: 12,
+  },
+  legalLink: {
+    ...typography.sans.semibold,
+    textDecorationLine: 'underline',
   },
 });
