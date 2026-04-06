@@ -4,7 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import type { PurchasesPackage } from 'react-native-purchases';
-import { Check, Sparkles } from 'lucide-react-native';
+import { Check, RefreshCw, Shield, Sparkles } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
 import { useEthica } from '@/contexts/EthicaContext';
@@ -16,6 +17,12 @@ const PREMIUM_FEATURES = [
   'Advanced analytics & insights',
   'Export your complete journal',
   'Priority support',
+];
+
+const TRUST_ITEMS = [
+  'Auto-renewing subscription',
+  'Prices shown before purchase',
+  'Restore purchases anytime',
 ];
 
 type PlanKey = 'weekly' | 'monthly';
@@ -41,6 +48,12 @@ function getPackagePrice(pkg: PurchasesPackage | null, fallback: string): string
     ?? fallback;
 
   return stripTrialText(normalizedPrice);
+}
+
+function getBillingText(plan: PlanKey, price: string): string {
+  return plan === 'monthly'
+    ? `1 month subscription • ${price} billed every month`
+    : `1 week subscription • ${price} billed every week`;
 }
 
 export default function Paywall() {
@@ -118,8 +131,17 @@ export default function Paywall() {
     return plans;
   }, [monthlyPackage, weeklyPackage]);
 
+  const activePriceLabel = selectedPlan === 'monthly' ? `${monthlyPrice}/month` : `${weeklyPrice}/week`;
+  const heroSurfaceColor = isDark ? '#242220' : '#F1E8D9';
+  const accentMutedColor = isDark ? 'rgba(200, 200, 200, 0.12)' : 'rgba(74, 74, 74, 0.08)';
+
   const handleClose = () => {
     router.replace('/virtue-selection');
+  };
+
+  const handleSelectPlan = (plan: PlanKey) => {
+    void Haptics.selectionAsync();
+    setSelectedPlan(plan);
   };
 
   const handlePurchase = async () => {
@@ -132,6 +154,7 @@ export default function Paywall() {
     }
 
     try {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await purchase(selectedPlan);
       Alert.alert(
         'Success!',
@@ -176,8 +199,6 @@ export default function Paywall() {
     router.push({ pathname: '/policies', params: { section } });
   };
 
-  const activePriceLabel = selectedPlan === 'monthly' ? `${monthlyPrice}/month` : `${weeklyPrice}/week`;
-
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}> 
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
@@ -186,131 +207,144 @@ export default function Paywall() {
           contentContainerStyle={[styles.scrollContent, { paddingHorizontal: horizontalPadding }]}
           showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.contentShell, { maxWidth: isTabletLayout ? 860 : 560 }]}>
-            <View style={styles.header}>
-              <View style={[styles.iconContainer, { backgroundColor: theme.accent + '20' }]}> 
-                <Sparkles size={32} color={theme.accent} strokeWidth={1.5} />
+          <View style={[styles.contentShell, { maxWidth: isTabletLayout ? 980 : 560 }]}> 
+            <View style={[styles.heroCard, { backgroundColor: heroSurfaceColor, borderColor: theme.border }]}> 
+              <View style={styles.heroTopRow}>
+                <View style={[styles.iconContainer, { backgroundColor: accentMutedColor }]}> 
+                  <Sparkles size={30} color={theme.accent} strokeWidth={1.75} />
+                </View>
+                <View style={[styles.statusPill, { backgroundColor: theme.surface, borderColor: theme.border }]}> 
+                  <Shield size={14} color={theme.accent} strokeWidth={1.8} />
+                  <Text style={[styles.statusPillText, { color: theme.textSecondary }]}>Secure subscription</Text>
+                </View>
               </View>
-              <Text style={[styles.title, { color: theme.text }]}>
-                Upgrade to Ethica Pro
-              </Text>
-              <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-                Unlock the full potential of your character development journey
-              </Text>
+
+              <Text style={[styles.eyebrow, { color: theme.textTertiary }]}>ETHICA PRO</Text>
+              <Text style={[styles.title, { color: theme.text }]}>Upgrade to Ethica Pro</Text>
+              <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Unlock the full potential of your character development journey</Text>
+
+              <View style={styles.trustRow}>
+                {TRUST_ITEMS.map((item) => (
+                  <View key={item} style={[styles.trustChip, { backgroundColor: theme.surface, borderColor: theme.borderLight }]}> 
+                    <Text style={[styles.trustChipText, { color: theme.textSecondary }]}>{item}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
 
-            <View style={styles.featuresContainer}>
-              {PREMIUM_FEATURES.map((feature) => (
-                <View key={feature} style={styles.featureRow}>
-                  <View style={[styles.checkContainer, { backgroundColor: theme.accent + '20' }]}> 
-                    <Check size={16} color={theme.accent} strokeWidth={2.5} />
+            <View style={[styles.featurePanel, { backgroundColor: theme.surface, borderColor: theme.border }]}> 
+              <View style={styles.sectionHeader}>
+                <Text style={[styles.sectionTitle, { color: theme.text }]}>Everything included</Text>
+                <Text style={[styles.sectionCaption, { color: theme.textTertiary }]}>Keep your current flow, with more depth and flexibility.</Text>
+              </View>
+              <View style={styles.featuresContainer}>
+                {PREMIUM_FEATURES.map((feature) => (
+                  <View key={feature} style={styles.featureRow}>
+                    <View style={[styles.checkContainer, { backgroundColor: theme.accent + '18' }]}> 
+                      <Check size={16} color={theme.accent} strokeWidth={2.5} />
+                    </View>
+                    <Text style={[styles.featureText, { color: theme.text }]}>{feature}</Text>
                   </View>
-                  <Text style={[styles.featureText, { color: theme.text }]}> 
-                    {feature}
-                  </Text>
-                </View>
-              ))}
+                ))}
+              </View>
             </View>
 
             {missingPlans.length > 0 && !isLoadingOfferings ? (
               <View style={[styles.statusCard, { backgroundColor: theme.surface, borderColor: theme.border }]}> 
                 <Text style={[styles.statusTitle, { color: theme.text }]}>Subscription setup needs attention</Text>
-                <Text style={[styles.statusText, { color: theme.textSecondary }]}> 
-                  Missing {missingPlans.join(' and ')} package{missingPlans.length > 1 ? 's' : ''} from the current RevenueCat offering.
-                </Text>
+                <Text style={[styles.statusText, { color: theme.textSecondary }]}>Missing {missingPlans.join(' and ')} package{missingPlans.length > 1 ? 's' : ''} from the current RevenueCat offering.</Text>
               </View>
             ) : null}
 
             {isPro ? (
               <View style={[styles.statusCard, { backgroundColor: theme.surface, borderColor: theme.accent }]}> 
                 <Text style={[styles.statusTitle, { color: theme.text }]}>Ethica Pro is active</Text>
-                <Text style={[styles.statusText, { color: theme.textSecondary }]}> 
-                  Your premium access is already unlocked on this device.
-                </Text>
+                <Text style={[styles.statusText, { color: theme.textSecondary }]}>Your premium access is already unlocked on this device.</Text>
               </View>
             ) : null}
 
             {isLoadingOfferings ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={theme.accent} />
-                <Text style={[styles.loadingText, { color: theme.textSecondary }]}> 
-                  Loading subscription options...
-                </Text>
+                <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Loading subscription options...</Text>
               </View>
             ) : (
               <View style={[styles.pricingContainer, isTabletLayout && styles.pricingContainerTablet]}>
-                <TouchableOpacity
-                  style={[
-                    styles.pricingCard,
-                    isTabletLayout && styles.pricingCardTablet,
-                    {
-                      backgroundColor: theme.surface,
-                      borderColor: selectedPlan === 'monthly' ? theme.accent : theme.border,
-                      borderWidth: selectedPlan === 'monthly' ? 2 : 1,
-                    },
-                  ]}
-                  onPress={() => setSelectedPlan('monthly')}
-                  activeOpacity={0.7}
-                  testID="monthly-package"
-                >
-                  {weeklySavings > 0 ? (
-                    <View style={[styles.badge, { backgroundColor: theme.accent }]}> 
-                      <Text style={styles.badgeText}>Best Value</Text>
+                {[
+                  {
+                    key: 'monthly' as const,
+                    title: 'Monthly',
+                    price: monthlyPrice,
+                    selected: selectedPlan === 'monthly',
+                    description: getBillingText('monthly', monthlyPrice),
+                    billing: 'Auto-renewing monthly billing cycle. Cancel anytime.',
+                    highlight: weeklySavings > 0 ? `Save ${weeklySavings}% vs weekly` : 'Best Value',
+                  },
+                  {
+                    key: 'weekly' as const,
+                    title: 'Weekly',
+                    price: weeklyPrice,
+                    selected: selectedPlan === 'weekly',
+                    description: getBillingText('weekly', weeklyPrice),
+                    billing: 'Auto-renewing weekly billing cycle. Cancel anytime.',
+                    highlight: 'Flexible weekly access',
+                  },
+                ].map((plan) => (
+                  <TouchableOpacity
+                    key={plan.key}
+                    style={[
+                      styles.pricingCard,
+                      isTabletLayout && styles.pricingCardTablet,
+                      {
+                        backgroundColor: theme.surface,
+                        borderColor: plan.selected ? theme.accent : theme.border,
+                        borderWidth: plan.selected ? 2 : 1,
+                      },
+                    ]}
+                    onPress={() => handleSelectPlan(plan.key)}
+                    activeOpacity={0.8}
+                    testID={`${plan.key}-package`}
+                  >
+                    <View style={styles.planBadgeRow}>
+                      <View style={[styles.badge, { backgroundColor: plan.key === 'monthly' ? theme.accent : accentMutedColor }]}> 
+                        <Text style={[styles.badgeText, { color: plan.key === 'monthly' ? '#FFFFFF' : theme.text }]}>{plan.highlight}</Text>
+                      </View>
                     </View>
-                  ) : null}
-                  <View style={styles.pricingHeader}>
-                    <Text style={[styles.planName, { color: theme.text }]}>Monthly</Text>
-                    <Text style={[styles.planPrice, { color: theme.text }]}> 
-                      {monthlyPrice}
-                      <Text style={[styles.planPeriod, { color: theme.textSecondary }]}>/month</Text>
-                    </Text>
-                  </View>
-                  <Text style={[styles.planDetail, { color: theme.textSecondary }]}> 
-                    1 month subscription • {monthlyPrice} billed every month
-                  </Text>
-                  <Text style={[styles.planBillingCycle, { color: theme.textTertiary }]}> 
-                    Auto-renewing monthly billing cycle. Cancel anytime.
-                  </Text>
-                </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[
-                    styles.pricingCard,
-                    isTabletLayout && styles.pricingCardTablet,
-                    {
-                      backgroundColor: theme.surface,
-                      borderColor: selectedPlan === 'weekly' ? theme.accent : theme.border,
-                      borderWidth: selectedPlan === 'weekly' ? 2 : 1,
-                    },
-                  ]}
-                  onPress={() => setSelectedPlan('weekly')}
-                  activeOpacity={0.7}
-                  testID="weekly-package"
-                >
-                  <View style={styles.pricingHeader}>
-                    <Text style={[styles.planName, { color: theme.text }]}>Weekly</Text>
-                    <Text style={[styles.planPrice, { color: theme.text }]}> 
-                      {weeklyPrice}
-                      <Text style={[styles.planPeriod, { color: theme.textSecondary }]}>/week</Text>
-                    </Text>
-                  </View>
-                  <Text style={[styles.planDetail, { color: theme.textSecondary }]}> 
-                    1 week subscription • {weeklyPrice} billed every week
-                  </Text>
-                  <Text style={[styles.planBillingCycle, { color: theme.textTertiary }]}> 
-                    Auto-renewing weekly billing cycle. Cancel anytime.
-                  </Text>
-                </TouchableOpacity>
+                    <View style={styles.pricingHeader}>
+                      <Text style={[styles.planName, { color: theme.text }]}>{plan.title}</Text>
+                      <Text style={[styles.planPrice, { color: theme.text }]}>
+                        {plan.price}
+                        <Text style={[styles.planPeriod, { color: theme.textSecondary }]}>{plan.key === 'monthly' ? '/month' : '/week'}</Text>
+                      </Text>
+                    </View>
+
+                    <Text style={[styles.planDetail, { color: theme.textSecondary }]}>{plan.description}</Text>
+                    <Text style={[styles.planBillingCycle, { color: theme.textTertiary }]}>{plan.billing}</Text>
+
+                    <View style={styles.planMetaRow}>
+                      <View style={[styles.planMetaPill, { backgroundColor: theme.backgroundSecondary }]}> 
+                        <Text style={[styles.planMetaText, { color: theme.textSecondary }]}>{plan.key === 'monthly' ? 'Duration: 1 month' : 'Duration: 1 week'}</Text>
+                      </View>
+                      <View style={[styles.planMetaPill, { backgroundColor: theme.backgroundSecondary }]}> 
+                        <Text style={[styles.planMetaText, { color: theme.textSecondary }]}>{plan.key === 'monthly' ? 'Billing: Monthly' : 'Billing: Weekly'}</Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                ))}
               </View>
             )}
           </View>
         </ScrollView>
 
         <View style={[styles.footerOuter, { borderTopColor: theme.border }]}> 
-          <View style={[styles.footerInner, { maxWidth: isTabletLayout ? 860 : 560, paddingHorizontal: horizontalPadding }]}> 
-            <Text style={[styles.noPaymentText, { color: theme.textSecondary }]}> 
-              Cancel anytime. No free trials.
-            </Text>
+          <View style={[styles.footerInner, { maxWidth: isTabletLayout ? 980 : 560, paddingHorizontal: horizontalPadding }]}> 
+            <View style={[styles.summaryCard, { backgroundColor: theme.surface, borderColor: theme.border }]}> 
+              <Text style={[styles.summaryLabel, { color: theme.textTertiary }]}>Selected plan</Text>
+              <Text style={[styles.summaryPrice, { color: theme.text }]}>{activePriceLabel}</Text>
+              <Text style={[styles.summaryCaption, { color: theme.textSecondary }]}>Cancel anytime. No free trials.</Text>
+            </View>
+
             <TouchableOpacity
               style={[
                 styles.subscribeButton,
@@ -318,17 +352,44 @@ export default function Paywall() {
               ]}
               onPress={handlePurchase}
               disabled={isPurchasing || isLoadingOfferings || !selectedRevenueCatPackage || isPro}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
               testID="subscribe-button"
             >
               {isPurchasing ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
-                <Text style={styles.subscribeButtonText}>
-                  {isPro ? 'You already have Pro' : `Subscribe to ${selectedPlan === 'monthly' ? 'Monthly' : 'Weekly'}`}
-                </Text>
+                <Text style={styles.subscribeButtonText}>{isPro ? 'You already have Pro' : `Subscribe to ${selectedPlan === 'monthly' ? 'Monthly' : 'Weekly'}`}</Text>
               )}
             </TouchableOpacity>
+
+            <View style={styles.secondaryActionsRow}>
+              <TouchableOpacity
+                style={[styles.secondaryAction, { backgroundColor: theme.surface, borderColor: theme.border }]}
+                onPress={handleRestore}
+                disabled={isRestoring}
+                activeOpacity={0.8}
+                testID="restore-button"
+              >
+                <Text style={[styles.secondaryActionText, { color: theme.textSecondary }]}>{isRestoring ? 'Restoring...' : 'Restore Purchases'}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.secondaryAction, { backgroundColor: theme.surface, borderColor: theme.border }]}
+                onPress={handleRefresh}
+                disabled={isRefreshing || isLoadingOfferings}
+                activeOpacity={0.8}
+                testID="refresh-revenuecat-button"
+              >
+                {isRefreshing ? (
+                  <ActivityIndicator size="small" color={theme.textTertiary} />
+                ) : (
+                  <View style={styles.refreshContent}>
+                    <RefreshCw size={14} color={theme.textTertiary} strokeWidth={2} />
+                    <Text style={[styles.secondaryActionText, { color: theme.textSecondary }]}>Refresh RevenueCat</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity
               style={styles.skipButton}
@@ -336,61 +397,18 @@ export default function Paywall() {
               activeOpacity={0.7}
               testID="skip-button"
             >
-              <Text style={[styles.skipButtonText, { color: theme.textSecondary }]}> 
-                Skip and continue to app
-              </Text>
+              <Text style={[styles.skipButtonText, { color: theme.textSecondary }]}>Skip and continue to app</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.restoreButton}
-              onPress={handleRestore}
-              disabled={isRestoring}
-              activeOpacity={0.7}
-              testID="restore-button"
-            >
-              <Text style={[styles.restoreButtonText, { color: theme.textTertiary }]}> 
-                {isRestoring ? 'Restoring...' : 'Restore Purchases'}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.refreshButton}
-              onPress={handleRefresh}
-              disabled={isRefreshing || isLoadingOfferings}
-              activeOpacity={0.7}
-              testID="refresh-revenuecat-button"
-            >
-              {isRefreshing ? (
-                <ActivityIndicator size="small" color={theme.textTertiary} />
-              ) : (
-                <Text style={[styles.restoreButtonText, { color: theme.textTertiary }]}> 
-                  Refresh RevenueCat
-                </Text>
-              )}
-            </TouchableOpacity>
-
-            <Text style={[styles.disclaimer, { color: theme.textTertiary }]}> 
-              {activePriceLabel}. Cancel anytime.
-            </Text>
-            <View
-              style={[styles.legalContainer, { backgroundColor: theme.surface, borderColor: theme.borderLight }]}
-              testID="paywall-legal-footer"
-            >
+            <Text style={[styles.disclaimer, { color: theme.textTertiary }]}>{activePriceLabel}. Cancel anytime.</Text>
+            <View style={[styles.legalContainer, { backgroundColor: theme.surface, borderColor: theme.borderLight }]} testID="paywall-legal-footer">
               <Text style={[styles.legalText, { color: theme.textTertiary }]}>By subscribing, you agree to our</Text>
               <View style={styles.legalLinksRow}>
-                <TouchableOpacity
-                  onPress={openPoliciesPage('terms')}
-                  activeOpacity={0.7}
-                  testID="terms-of-use-link"
-                >
+                <TouchableOpacity onPress={openPoliciesPage('terms')} activeOpacity={0.7} testID="terms-of-use-link">
                   <Text style={[styles.legalLink, { color: theme.accent }]}>Terms of Use</Text>
                 </TouchableOpacity>
                 <Text style={[styles.legalDivider, { color: theme.textTertiary }]}>|</Text>
-                <TouchableOpacity
-                  onPress={openPoliciesPage('privacy')}
-                  activeOpacity={0.7}
-                  testID="privacy-policy-link"
-                >
+                <TouchableOpacity onPress={openPoliciesPage('privacy')} activeOpacity={0.7} testID="privacy-policy-link">
                   <Text style={[styles.legalLink, { color: theme.accent }]}>Privacy Policy</Text>
                 </TouchableOpacity>
               </View>
@@ -413,40 +431,97 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 28,
-    paddingBottom: 24,
+    paddingTop: 24,
+    paddingBottom: 28,
   },
   contentShell: {
     width: '100%',
     alignSelf: 'center',
+    gap: 18,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: 32,
+  heroCard: {
+    borderWidth: 1,
+    borderRadius: 28,
+    padding: 24,
     gap: 16,
   },
+  heroTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+  },
   iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  statusPillText: {
+    ...typography.sans.medium,
+    fontSize: 12,
+  },
+  eyebrow: {
+    ...typography.sans.medium,
+    fontSize: 12,
+    letterSpacing: 1.4,
   },
   title: {
     ...typography.serif.semibold,
     fontSize: sizes.xlarge,
-    textAlign: 'center',
+    lineHeight: 40,
   },
   subtitle: {
     ...typography.sans.regular,
     fontSize: sizes.body,
-    textAlign: 'center',
-    lineHeight: 22,
-    maxWidth: 520,
+    lineHeight: 23,
+    maxWidth: 560,
+  },
+  trustRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  trustChip: {
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  trustChipText: {
+    ...typography.sans.medium,
+    fontSize: 12,
+  },
+  featurePanel: {
+    borderWidth: 1,
+    borderRadius: 24,
+    padding: 22,
+    gap: 18,
+  },
+  sectionHeader: {
+    gap: 4,
+  },
+  sectionTitle: {
+    ...typography.serif.semibold,
+    fontSize: sizes.large,
+  },
+  sectionCaption: {
+    ...typography.sans.regular,
+    fontSize: 13,
+    lineHeight: 18,
   },
   featuresContainer: {
-    gap: 16,
-    marginBottom: 24,
+    gap: 14,
   },
   featureRow: {
     flexDirection: 'row',
@@ -467,9 +542,8 @@ const styles = StyleSheet.create({
   },
   statusCard: {
     borderWidth: 1,
-    borderRadius: 18,
+    borderRadius: 20,
     padding: 18,
-    marginBottom: 20,
     gap: 8,
   },
   statusTitle: {
@@ -498,33 +572,31 @@ const styles = StyleSheet.create({
   },
   pricingCard: {
     padding: 20,
-    borderRadius: 18,
-    position: 'relative',
+    borderRadius: 24,
+    gap: 10,
   },
   pricingCardTablet: {
     flex: 1,
   },
+  planBadgeRow: {
+    alignItems: 'flex-start',
+  },
   badge: {
-    position: 'absolute',
-    top: -10,
-    right: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
     borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
   badgeText: {
     ...typography.sans.semibold,
-    fontSize: 12,
-    letterSpacing: 0.5,
+    fontSize: 11,
+    letterSpacing: 0.4,
     textTransform: 'uppercase',
-    color: '#FFFFFF',
   },
   pricingHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
     gap: 12,
-    marginBottom: 8,
   },
   planName: {
     ...typography.serif.semibold,
@@ -547,26 +619,57 @@ const styles = StyleSheet.create({
     ...typography.sans.regular,
     fontSize: 13,
     lineHeight: 18,
+  },
+  planMetaRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
     marginTop: 6,
+  },
+  planMetaPill: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
+  planMetaText: {
+    ...typography.sans.medium,
+    fontSize: 12,
   },
   footerOuter: {
     borderTopWidth: 1,
-    paddingTop: 18,
-    paddingBottom: 14,
+    paddingTop: 16,
+    paddingBottom: 12,
   },
   footerInner: {
     width: '100%',
     alignSelf: 'center',
     gap: 12,
   },
-  noPaymentText: {
+  summaryCard: {
+    borderWidth: 1,
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    gap: 2,
+  },
+  summaryLabel: {
     ...typography.sans.medium,
-    fontSize: 14,
-    textAlign: 'center',
+    fontSize: 11,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  summaryPrice: {
+    ...typography.serif.semibold,
+    fontSize: 24,
+  },
+  summaryCaption: {
+    ...typography.sans.regular,
+    fontSize: 13,
   },
   subscribeButton: {
     paddingVertical: 16,
-    borderRadius: 16,
+    borderRadius: 18,
     alignItems: 'center',
   },
   subscribeButtonText: {
@@ -574,25 +677,37 @@ const styles = StyleSheet.create({
     fontSize: sizes.label,
     color: '#FFFFFF',
   },
+  secondaryActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  secondaryAction: {
+    flex: 1,
+    minHeight: 46,
+    borderWidth: 1,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+  },
+  secondaryActionText: {
+    ...typography.sans.medium,
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  refreshContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
   skipButton: {
-    paddingVertical: 12,
+    paddingVertical: 10,
     alignItems: 'center',
   },
   skipButtonText: {
     ...typography.sans.medium,
     fontSize: sizes.body,
-  },
-  restoreButton: {
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  refreshButton: {
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  restoreButtonText: {
-    ...typography.sans.regular,
-    fontSize: 13,
   },
   disclaimer: {
     ...typography.sans.regular,
