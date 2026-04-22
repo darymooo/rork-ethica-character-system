@@ -1,7 +1,8 @@
 import createContextHook from '@nkzw/create-context-hook';
-import type { CustomerInfo, PurchasesOfferings, PurchasesPackage } from 'react-native-purchases';
+import type { CustomerInfo, PurchasesEntitlementInfos, PurchasesOfferings, PurchasesPackage } from 'react-native-purchases';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Platform } from 'react-native';
 
 type PurchasesModule = typeof import('react-native-purchases');
 type PurchasesType = PurchasesModule['default'];
@@ -12,6 +13,8 @@ let purchasesInstance: PurchasesType | null = null;
 let purchasesConfigured = false;
 
 const ENTITLEMENT_ID = 'Ethica Pro';
+const CUSTOMER_INFO_QUERY_KEY = ['revenuecat-customer-info'] as const;
+const OFFERINGS_QUERY_KEY = ['revenuecat-offerings'] as const;
 
 function getRCToken(): string | undefined {
   if (__DEV__) {
@@ -25,6 +28,64 @@ function getRCToken(): string | undefined {
   });
 }
 
+function serializeRevenueCatError(error: unknown): Record<string, unknown> {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+    };
+  }
+
+  if (typeof error === 'object' && error !== null) {
+    const candidate = error as Record<string, unknown>;
+    return {
+      code: candidate.code,
+      message: candidate.message,
+      readableErrorCode: candidate.readableErrorCode,
+      userCancelled: candidate.userCancelled,
+      underlyingErrorMessage: candidate.underlyingErrorMessage,
+    };
+  }
+
+  return { value: error };
+}
+
+function getErrorMessage(error: unknown): string | null {
+  if (error instanceof Error) {
+    const trimmedMessage = error.message.trim();
+    return trimmedMessage.length > 0 ? trimmedMessage : null;
+  }
+
+  if (typeof error === 'object' && error !== null) {
+    const candidate = error as Record<string, unknown>;
+    if (typeof candidate.message === 'string') {
+      const trimmedMessage = candidate.message.trim();
+      return trimmedMessage.length > 0 ? trimmedMessage : null;
+    }
+  }
+
+  return null;
+}
+
+function getUserFacingRevenueCatError(error: unknown, fallback: string): Error {
+  const isCancelled = typeof error === 'object' && error !== null && (error as { userCancelled?: boolean }).userCancelled === true;
+  const message = getErrorMessage(error)?.toLowerCase() ?? '';
+
+  if (isCancelled) {
+    return new Error('Purchase cancelled');
+  }
+
+  if (message.includes('network') || message.includes('offline') || message.includes('internet')) {
+    return new Error('Please check your connection and try again.');
+  }
+
+  if (message.includes('not available') || message.includes('configuration') || message.includes('offer')) {
+    return new Error('Subscriptions are temporarily unavailable. Please try again shortly.');
+  }
+
+  return new Error(fallback);
+}
+
 function getPurchases(): PurchasesType | null {
   if (purchasesInstance) {
     return purchasesInstance;
@@ -35,9 +96,27 @@ function getPurchases(): PurchasesType | null {
     purchasesInstance = module.default;
     return purchasesInstance;
   } catch (error) {
-    console.error('RevenueCat module unavailable:', error);
+    console.error('RevenueCat module unavailable:', serializeRevenueCatError(error));
     return null;
   }
+}
+
+function getActiveEntitlements(customerInfo: CustomerInfo | null | undefined): PurchasesEntitlementInfos | null {
+  const entitlements = customerInfo?.entitlements?.active;
+  if (!entitlements || typeof entitlements !== 'object') {
+    return null;
+  }
+
+  return entitlements;
+}
+
+function hasProEntitlement(customerInfo: CustomerInfo | null | undefined): boolean {
+  const activeEntitlements = getActiveEntitlements(customerInfo);
+  if (!activeEntitlements) {
+    return false;
+  }
+
+  return activeEntitlements[ENTITLEMENT_ID] !== undefined;
 }
 
 function resolvePackageByPlan(
@@ -95,12 +174,10 @@ async function initializeRevenueCat(): Promise<boolean> {
     console.log('RevenueCat configured successfully');
     return true;
   } catch (error) {
-    console.error('Failed to configure RevenueCat:', error);
+    console.error('Failed to configure RevenueCat:', serializeRevenueCatError(error));
     return false;
   }
 }
-
-import { Platform } from 'react-native';
 
 const revenueCatSetupPromise = initializeRevenueCat();
 
@@ -136,8 +213,10 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
     }
 
     const handleCustomerInfoUpdate = (customerInfo: CustomerInfo) => {
-      console.log('RevenueCat customer info listener fired');
-      queryClient.setQueryData(['revenuecat-customer-info'], customerInfo);
+      console.log('RevenueCat customer info listener fired', {
+        activeEntitlements: Object.keys(getActiveEntitlements(customerInfo) ?? {}),
+      });
+      queryClient.setQueryData(CUSTOMER_INFO_QUERY_KEY, customerInfo);
     };
 
     purchases.addCustomerInfoUpdateListener(handleCustomerInfoUpdate);
@@ -148,7 +227,7 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
   }, [isInitialized, queryClient]);
 
   const customerInfoQuery = useQuery({
-    queryKey: ['revenuecat-customer-info'],
+    queryKey: CUSTOMER_INFO_QUERY_KEY,
     queryFn: async (): Promise<CustomerInfo | null> => {
       const purchases = getPurchases();
       if (!purchases) {
@@ -158,11 +237,12 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       try {
         const customerInfo = await purchases.getCustomerInfo();
         console.log('RevenueCat customer info fetched', {
-          activeEntitlements: Object.keys(customerInfo.entitlements.active ?? {}),
+          activeEntitlements: Object.keys(getActiveEntitlements(customerInfo) ?? {}),
+          originalAppUserId: customerInfo.originalAppUserId,
         });
         return customerInfo;
       } catch (error) {
-        console.error('Error fetching customer info:', error);
+        console.error('Error fetching customer info:', serializeRevenueCatError(error));
         return null;
       }
     },
@@ -171,7 +251,7 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
   });
 
   const offeringsQuery = useQuery({
-    queryKey: ['revenuecat-offerings'],
+    queryKey: OFFERINGS_QUERY_KEY,
     queryFn: async (): Promise<PurchasesOfferings | null> => {
       const purchases = getPurchases();
       if (!purchases) {
@@ -192,7 +272,7 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
         });
         return offerings;
       } catch (error) {
-        console.error('Error fetching offerings:', error);
+        console.error('Error fetching offerings:', serializeRevenueCatError(error));
         return null;
       }
     },
@@ -205,7 +285,7 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       return;
     }
 
-    const currentProStatus = customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
+    const currentProStatus = hasProEntitlement(customerInfo);
 
     if (previousProStatus.current === null) {
       previousProStatus.current = currentProStatus;
@@ -233,7 +313,7 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
     mutationFn: async (plan: RevenueCatPlan) => {
       const purchases = getPurchases();
       if (!purchases) {
-        throw new Error('Purchases are not available on this device.');
+        throw new Error('Subscriptions are not available right now.');
       }
 
       const pkg = resolvePackageByPlan(offeringsQuery.data, plan);
@@ -249,20 +329,19 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       });
 
       try {
-        const { customerInfo } = await purchases.purchasePackage(pkg);
-        return customerInfo;
-      } catch (error: any) {
-        if (error?.userCancelled) {
-          throw new Error('Purchase cancelled');
-        }
-
-        console.error('RevenueCat purchase failed', error);
-        throw error;
+        const purchaseResult = await purchases.purchasePackage(pkg);
+        console.log('RevenueCat purchase succeeded', {
+          activeEntitlements: Object.keys(getActiveEntitlements(purchaseResult.customerInfo) ?? {}),
+        });
+        return purchaseResult.customerInfo;
+      } catch (error: unknown) {
+        console.error('RevenueCat purchase failed', serializeRevenueCatError(error));
+        throw getUserFacingRevenueCatError(error, 'We could not complete the purchase. Please try again.');
       }
     },
     onSuccess: (customerInfo) => {
-      queryClient.setQueryData(['revenuecat-customer-info'], customerInfo);
-      void queryClient.invalidateQueries({ queryKey: ['revenuecat-offerings'] });
+      queryClient.setQueryData(CUSTOMER_INFO_QUERY_KEY, customerInfo);
+      void queryClient.invalidateQueries({ queryKey: OFFERINGS_QUERY_KEY });
     },
   });
 
@@ -270,31 +349,28 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
     mutationFn: async () => {
       const purchases = getPurchases();
       if (!purchases) {
-        throw new Error('Restore is not available on this device.');
+        throw new Error('Restore is not available right now.');
       }
 
       try {
         const customerInfo = await purchases.restorePurchases();
-        console.log('RevenueCat restore completed');
+        console.log('RevenueCat restore completed', {
+          activeEntitlements: Object.keys(getActiveEntitlements(customerInfo) ?? {}),
+        });
         return customerInfo;
-      } catch (error) {
-        console.error('Error restoring purchases:', error);
-        throw error;
+      } catch (error: unknown) {
+        console.error('Error restoring purchases:', serializeRevenueCatError(error));
+        throw getUserFacingRevenueCatError(error, 'We could not restore purchases right now. Please try again.');
       }
     },
     onSuccess: (customerInfo) => {
-      queryClient.setQueryData(['revenuecat-customer-info'], customerInfo);
-      void queryClient.invalidateQueries({ queryKey: ['revenuecat-offerings'] });
+      queryClient.setQueryData(CUSTOMER_INFO_QUERY_KEY, customerInfo);
+      void queryClient.invalidateQueries({ queryKey: OFFERINGS_QUERY_KEY });
     },
   });
 
   const isPro = useMemo((): boolean => {
-    const customerInfo = customerInfoQuery.data;
-    if (!customerInfo) {
-      return false;
-    }
-
-    return customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
+    return hasProEntitlement(customerInfoQuery.data);
   }, [customerInfoQuery.data]);
 
   const getProExpirationDate = useCallback((): Date | null => {
@@ -303,7 +379,7 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       return null;
     }
 
-    const entitlement = customerInfo.entitlements.active[ENTITLEMENT_ID];
+    const entitlement = getActiveEntitlements(customerInfo)?.[ENTITLEMENT_ID];
     if (!entitlement?.expirationDate) {
       return null;
     }

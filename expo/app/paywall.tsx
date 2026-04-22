@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, Alert, ActivityIndicator, useWindowDimensions } from 'react-native';
 import type { GestureResponderEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useMemo, useCallback, useState } from 'react';
 import type { PurchasesPackage } from 'react-native-purchases';
 import { Check, Sparkles } from 'lucide-react-native';
 import colors from '@/constants/colors';
@@ -43,8 +43,20 @@ function getPackagePrice(pkg: PurchasesPackage | null, fallback: string): string
   return stripTrialText(normalizedPrice);
 }
 
+function getSafeAlertMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error) {
+    const trimmedMessage = error.message.trim();
+    if (trimmedMessage.length > 0 && trimmedMessage !== '[object Object]') {
+      return trimmedMessage;
+    }
+  }
+
+  return fallback;
+}
+
 export default function Paywall() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ returnTo?: string }>();
   const systemColorScheme = useColorScheme();
   const { state } = useEthica();
   const { width } = useWindowDimensions();
@@ -52,6 +64,7 @@ export default function Paywall() {
   const theme = isDark ? colors.dark : colors.light;
   const isTabletLayout = width >= 768;
   const horizontalPadding = width < 380 ? 20 : isTabletLayout ? 32 : 24;
+  const returnTo = typeof params.returnTo === 'string' && params.returnTo.length > 0 ? params.returnTo : null;
 
   const {
     offerings,
@@ -60,14 +73,12 @@ export default function Paywall() {
     isPro,
     purchase,
     restorePurchases,
-    refreshRevenueCat,
     isPurchasing,
     isRestoring,
     isLoadingOfferings,
   } = useRevenueCat();
 
   const [selectedPlan, setSelectedPlan] = useState<PlanKey>('monthly');
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   useEffect(() => {
     console.log('Paywall offerings snapshot', offerings?.current?.availablePackages.map((pkg) => ({
@@ -89,6 +100,21 @@ export default function Paywall() {
       setSelectedPlan('monthly');
     }
   }, [monthlyPackage, weeklyPackage]);
+
+  const navigateBack = useCallback(() => {
+    console.log('Closing paywall', { returnTo });
+    if (returnTo) {
+      router.replace(returnTo as never);
+      return;
+    }
+
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace('/home');
+  }, [returnTo, router]);
 
   const selectedRevenueCatPackage = selectedPlan === 'monthly' ? monthlyPackage : weeklyPackage;
   const weeklyPrice = getPackagePrice(weeklyPackage, '$2.99');
@@ -119,14 +145,14 @@ export default function Paywall() {
   }, [monthlyPackage, weeklyPackage]);
 
   const handleClose = () => {
-    router.replace('/virtue-selection');
+    navigateBack();
   };
 
   const handlePurchase = async () => {
     if (!selectedRevenueCatPackage) {
       Alert.alert(
         'Subscription Unavailable',
-        `The ${selectedPlan} subscription is not available right now. Please refresh and try again.`
+        `The ${selectedPlan} subscription is not available right now. Please try again shortly.`
       );
       return;
     }
@@ -136,24 +162,14 @@ export default function Paywall() {
       Alert.alert(
         'Success!',
         'Welcome to Ethica Pro! You now have access to all premium features.',
-        [{ text: 'Continue', onPress: () => router.replace('/virtue-selection') }]
+        [{ text: 'Continue', onPress: navigateBack }]
       );
-    } catch (error: any) {
-      if (error?.message !== 'Purchase cancelled') {
-        Alert.alert('Purchase Failed', error?.message || 'Something went wrong. Please try again.');
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'Purchase cancelled') {
+        return;
       }
-    }
-  };
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await refreshRevenueCat();
-      Alert.alert('Refreshed', 'RevenueCat products have been refreshed.');
-    } catch (error: any) {
-      Alert.alert('Refresh Failed', error?.message || 'Could not refresh RevenueCat data.');
-    } finally {
-      setIsRefreshing(false);
+      Alert.alert('Purchase Failed', getSafeAlertMessage(error, 'We could not complete the purchase. Please try again.'));
     }
   };
 
@@ -163,10 +179,10 @@ export default function Paywall() {
       Alert.alert(
         'Restore Complete',
         'Your purchases have been restored.',
-        [{ text: 'OK', onPress: () => router.replace('/virtue-selection') }]
+        [{ text: 'OK', onPress: navigateBack }]
       );
-    } catch (error: any) {
-      Alert.alert('Restore Failed', error?.message || 'Could not restore purchases. Please try again.');
+    } catch (error: unknown) {
+      Alert.alert('Restore Failed', getSafeAlertMessage(error, 'We could not restore purchases right now. Please try again.'));
     }
   };
 
@@ -191,12 +207,8 @@ export default function Paywall() {
               <View style={[styles.iconContainer, { backgroundColor: theme.accent + '20' }]}> 
                 <Sparkles size={32} color={theme.accent} strokeWidth={1.5} />
               </View>
-              <Text style={[styles.title, { color: theme.text }]}>
-                Upgrade to Ethica Pro
-              </Text>
-              <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-                Unlock the full potential of your character development journey
-              </Text>
+              <Text style={[styles.title, { color: theme.text }]}>Upgrade to Ethica Pro</Text>
+              <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Unlock the full potential of your character development journey</Text>
             </View>
 
             <View style={styles.featuresContainer}>
@@ -205,9 +217,7 @@ export default function Paywall() {
                   <View style={[styles.checkContainer, { backgroundColor: theme.accent + '20' }]}> 
                     <Check size={16} color={theme.accent} strokeWidth={2.5} />
                   </View>
-                  <Text style={[styles.featureText, { color: theme.text }]}> 
-                    {feature}
-                  </Text>
+                  <Text style={[styles.featureText, { color: theme.text }]}>{feature}</Text>
                 </View>
               ))}
             </View>
@@ -233,9 +243,7 @@ export default function Paywall() {
             {isLoadingOfferings ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={theme.accent} />
-                <Text style={[styles.loadingText, { color: theme.textSecondary }]}> 
-                  Loading subscription options...
-                </Text>
+                <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Loading subscription options...</Text>
               </View>
             ) : (
               <View style={[styles.pricingContainer, isTabletLayout && styles.pricingContainerTablet]}>
@@ -265,12 +273,8 @@ export default function Paywall() {
                       <Text style={[styles.planPeriod, { color: theme.textSecondary }]}>/month</Text>
                     </Text>
                   </View>
-                  <Text style={[styles.planDetail, { color: theme.textSecondary }]}> 
-                    1 month subscription • {monthlyPrice} billed every month
-                  </Text>
-                  <Text style={[styles.planBillingCycle, { color: theme.textTertiary }]}> 
-                    Auto-renewing monthly billing cycle. Cancel anytime.
-                  </Text>
+                  <Text style={[styles.planDetail, { color: theme.textSecondary }]}>1 month subscription • {monthlyPrice} billed every month</Text>
+                  <Text style={[styles.planBillingCycle, { color: theme.textTertiary }]}>Auto-renewing monthly billing cycle. Cancel anytime.</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -294,12 +298,8 @@ export default function Paywall() {
                       <Text style={[styles.planPeriod, { color: theme.textSecondary }]}>/week</Text>
                     </Text>
                   </View>
-                  <Text style={[styles.planDetail, { color: theme.textSecondary }]}> 
-                    1 week subscription • {weeklyPrice} billed every week
-                  </Text>
-                  <Text style={[styles.planBillingCycle, { color: theme.textTertiary }]}> 
-                    Auto-renewing weekly billing cycle. Cancel anytime.
-                  </Text>
+                  <Text style={[styles.planDetail, { color: theme.textSecondary }]}>1 week subscription • {weeklyPrice} billed every week</Text>
+                  <Text style={[styles.planBillingCycle, { color: theme.textTertiary }]}>Auto-renewing weekly billing cycle. Cancel anytime.</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -308,9 +308,7 @@ export default function Paywall() {
 
         <View style={[styles.footerOuter, { borderTopColor: theme.border }]}> 
           <View style={[styles.footerInner, { maxWidth: isTabletLayout ? 860 : 560, paddingHorizontal: horizontalPadding }]}> 
-            <Text style={[styles.noPaymentText, { color: theme.textSecondary }]}> 
-              Cancel anytime. No free trials.
-            </Text>
+            <Text style={[styles.noPaymentText, { color: theme.textSecondary }]}>Cancel anytime. No free trials.</Text>
             <TouchableOpacity
               style={[
                 styles.subscribeButton,
@@ -336,9 +334,7 @@ export default function Paywall() {
               activeOpacity={0.7}
               testID="skip-button"
             >
-              <Text style={[styles.skipButtonText, { color: theme.textSecondary }]}> 
-                Skip and continue to app
-              </Text>
+              <Text style={[styles.skipButtonText, { color: theme.textSecondary }]}>Skip and continue to app</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -353,25 +349,7 @@ export default function Paywall() {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.refreshButton}
-              onPress={handleRefresh}
-              disabled={isRefreshing || isLoadingOfferings}
-              activeOpacity={0.7}
-              testID="refresh-revenuecat-button"
-            >
-              {isRefreshing ? (
-                <ActivityIndicator size="small" color={theme.textTertiary} />
-              ) : (
-                <Text style={[styles.restoreButtonText, { color: theme.textTertiary }]}> 
-                  Refresh RevenueCat
-                </Text>
-              )}
-            </TouchableOpacity>
-
-            <Text style={[styles.disclaimer, { color: theme.textTertiary }]}> 
-              {activePriceLabel}. Cancel anytime.
-            </Text>
+            <Text style={[styles.disclaimer, { color: theme.textTertiary }]}>{activePriceLabel}. Cancel anytime.</Text>
             <View
               style={[styles.legalContainer, { backgroundColor: theme.surface, borderColor: theme.borderLight }]}
               testID="paywall-legal-footer"
@@ -586,10 +564,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: 'center',
   },
-  refreshButton: {
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
   restoreButtonText: {
     ...typography.sans.regular,
     fontSize: 13,
@@ -618,17 +592,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
     flexWrap: 'wrap',
-    columnGap: 8,
-    rowGap: 4,
+  },
+  legalLink: {
+    ...typography.sans.medium,
+    fontSize: 12,
   },
   legalDivider: {
     ...typography.sans.regular,
     fontSize: 12,
-  },
-  legalLink: {
-    ...typography.sans.semibold,
-    fontSize: 12,
-    textDecorationLine: 'underline',
   },
 });

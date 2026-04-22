@@ -352,7 +352,7 @@ export default function Settings() {
             <View style={[styles.sectionCard, { backgroundColor: theme.surface }]}>
               <TouchableOpacity
                 style={styles.upgradeCard}
-                onPress={() => router.push('/paywall')}
+                onPress={() => router.push({ pathname: '/paywall', params: { returnTo: '/settings' } })}
                 activeOpacity={0.7}
               >
                 <View style={[styles.upgradeIconContainer, { backgroundColor: theme.accent + '20' }]}>
@@ -382,7 +382,7 @@ export default function Settings() {
                 icon={<Sparkles size={18} color={theme.accent} strokeWidth={2} />}
                 label="Ethica Pro"
                 sublabel="Manage your subscription"
-                onPress={() => router.push('/paywall')}
+                onPress={() => router.push({ pathname: '/paywall', params: { returnTo: '/settings' } })}
                 showChevron
                 theme={theme}
                 isLast

@@ -29,7 +29,7 @@ export default function CustomVirtues() {
         'Custom virtues are available in Ethica Pro. Upgrade to create your own virtues.',
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Upgrade', onPress: () => router.push('/paywall') }
+          { text: 'Upgrade', onPress: () => router.push({ pathname: '/paywall', params: { returnTo: '/custom-virtues' } }) }
         ]
       );
       return;
@@ -103,7 +103,7 @@ export default function CustomVirtues() {
         {!isPro && (
           <TouchableOpacity
             style={[styles.proCard, { backgroundColor: theme.surface, borderColor: theme.accent }]}
-            onPress={() => router.push('/paywall')}
+            onPress={() => router.push({ pathname: '/paywall', params: { returnTo: '/custom-virtues' } })}
             activeOpacity={0.7}
             testID="upgrade-banner"
           >
