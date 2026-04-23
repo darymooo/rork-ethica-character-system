@@ -1,5 +1,4 @@
 import { useEthica } from '@/contexts/EthicaContext';
-import { VIRTUES } from '@/constants/virtues';
 import { useRouter } from 'expo-router';
 
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
@@ -9,7 +8,7 @@ import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
 
 export default function Analytics() {
-  const { state, getDetailedAnalytics, getStreakData, getVirtueStatistics } = useEthica();
+  const { state, getDetailedAnalytics, getStreakData, getVirtueStatistics, getVirtueById } = useEthica();
   const router = useRouter();
   const systemColorScheme = useColorScheme();
   const isDark = state.followSystemTheme ? systemColorScheme === 'dark' : state.darkMode;
@@ -22,8 +21,7 @@ export default function Analytics() {
   const isSmallScreen = screenWidth < 380;
 
   const getVirtueName = (virtueId: string | null): string => {
-    if (!virtueId) return '—';
-    return VIRTUES.find(v => v.id === virtueId)?.name || virtueId;
+    return getVirtueById(virtueId)?.name ?? '—';
   };
 
   const hasData = analytics.totalWeeks > 0 || streakData.totalDaysLogged > 0;
@@ -230,7 +228,7 @@ export default function Analytics() {
                 {virtueStats
                   .sort((a, b) => b.attempts - a.attempts)
                   .map((stat) => {
-                    const virtue = VIRTUES.find(v => v.id === stat.virtueId);
+                    const virtue = getVirtueById(stat.virtueId);
                     const progressWidth = stat.attempts > 0 
                       ? Math.round(Math.min((1 - stat.avgFaults / 7) * 100, 100)) 
                       : 0;

@@ -1,5 +1,5 @@
 import { useEthica } from '@/contexts/EthicaContext';
-import { VIRTUES, FRANKLIN_QUOTES } from '@/constants/virtues';
+import { FRANKLIN_QUOTES } from '@/constants/virtues';
 import { useRouter } from 'expo-router';
 import { useMemo, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, ScrollView, useWindowDimensions, Animated } from 'react-native';
@@ -10,7 +10,7 @@ import { typography, sizes } from '@/constants/typography';
 import { requestStoreReview, shouldTriggerReview } from '@/utils/storeReview';
 
 export default function WeekReview() {
-  const { state, getVirtueHistory, getCurrentWeekObservations, completeWeek, startNewWeek, getCycleProgress } = useEthica();
+  const { state, getVirtueHistory, getCurrentWeekObservations, completeWeek, startNewWeek, getCycleProgress, getVirtueById } = useEthica();
   const router = useRouter();
   const systemColorScheme = useColorScheme();
   const isDark = state.followSystemTheme ? systemColorScheme === 'dark' : state.darkMode;
@@ -18,7 +18,7 @@ export default function WeekReview() {
   const { width: screenWidth } = useWindowDimensions();
   const isSmallScreen = screenWidth < 380;
 
-  const currentVirtue = VIRTUES.find(v => v.id === state.currentVirtueId);
+  const currentVirtue = getVirtueById(state.currentVirtueId);
   const observations = getCurrentWeekObservations();
   
   const totalFaults = observations.filter(obs => obs.hasFault).length;
@@ -37,8 +37,12 @@ export default function WeekReview() {
   }, [previousWeeks]);
 
   const randomQuote = useMemo(() => {
+    if (currentVirtue?.isCustom) {
+      return currentVirtue.context;
+    }
+
     return FRANKLIN_QUOTES[Math.floor(Math.random() * FRANKLIN_QUOTES.length)];
-  }, []);
+  }, [currentVirtue]);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -226,7 +230,7 @@ export default function WeekReview() {
               &ldquo;{randomQuote}&rdquo;
             </Text>
             <Text style={[styles.quoteAuthor, { color: theme.textTertiary }]}>
-              — Benjamin Franklin
+              {currentVirtue?.isCustom ? '— Your custom virtue' : '— Benjamin Franklin'}
             </Text>
           </View>
         </Animated.View>

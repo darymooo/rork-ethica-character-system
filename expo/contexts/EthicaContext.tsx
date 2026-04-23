@@ -42,6 +42,17 @@ export interface CustomVirtue {
   createdAt: string;
 }
 
+export interface AppVirtue {
+  id: string;
+  name: string;
+  description: string;
+  context: string;
+  quote?: string;
+  fullDescription?: string;
+  createdAt?: string;
+  isCustom: boolean;
+}
+
 export interface AppState {
   hasCompletedOnboarding: boolean;
   hasSeenOnboarding: boolean;
@@ -325,6 +336,37 @@ export const [EthicaProvider, useEthica] = createContextHook(() => {
     return state.weekRecords.filter(r => r.virtueId === virtueId);
   };
 
+  const getAllVirtues = (): AppVirtue[] => {
+    const franklinVirtues: AppVirtue[] = VIRTUES.map((virtue) => ({
+      id: virtue.id,
+      name: virtue.name,
+      description: virtue.description,
+      context: virtue.context,
+      quote: virtue.quote,
+      fullDescription: virtue.fullDescription,
+      isCustom: false,
+    }));
+
+    const customVirtues: AppVirtue[] = state.customVirtues.map((virtue) => ({
+      id: virtue.id,
+      name: virtue.name,
+      description: virtue.description,
+      context: virtue.context || 'A custom virtue for personal growth.',
+      createdAt: virtue.createdAt,
+      isCustom: true,
+    }));
+
+    return [...franklinVirtues, ...customVirtues];
+  };
+
+  const getVirtueById = (virtueId: string | null | undefined): AppVirtue | null => {
+    if (!virtueId) {
+      return null;
+    }
+
+    return getAllVirtues().find((virtue) => virtue.id === virtueId) ?? null;
+  };
+
   const addToVirtueQueue = (virtueId: string) => {
     if (!state.virtueQueue.includes(virtueId)) {
       updateState({ virtueQueue: [...state.virtueQueue, virtueId] });
@@ -403,7 +445,7 @@ export const [EthicaProvider, useEthica] = createContextHook(() => {
 
   const getNeverAttemptedVirtues = (): string[] => {
     const attemptedVirtues = new Set(state.weekRecords.map(r => r.virtueId));
-    const allVirtueIds = ['temperance', 'silence', 'order', 'resolution', 'frugality', 'industry', 'sincerity', 'justice', 'moderation', 'cleanliness', 'tranquility', 'chastity', 'humility'];
+    const allVirtueIds = getAllVirtues().map((virtue) => virtue.id);
     return allVirtueIds.filter(id => !attemptedVirtues.has(id) && id !== state.currentVirtueId);
   };
 
@@ -561,6 +603,8 @@ export const [EthicaProvider, useEthica] = createContextHook(() => {
     completeWeek,
     startNewWeek,
     getVirtueHistory,
+    getAllVirtues,
+    getVirtueById,
     addToVirtueQueue,
     removeFromVirtueQueue,
     reorderVirtueQueue,

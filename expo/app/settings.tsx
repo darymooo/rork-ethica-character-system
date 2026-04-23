@@ -147,6 +147,18 @@ export default function Settings() {
 
 
   const handleExport = async () => {
+    if (!isPro) {
+      Alert.alert(
+        'Ethica Pro required',
+        'Exporting your full character record is part of Ethica Pro.',
+        [
+          { text: 'Not now', style: 'cancel' },
+          { text: 'Upgrade', onPress: () => router.push({ pathname: '/paywall', params: { returnTo: '/settings' } }) },
+        ]
+      );
+      return;
+    }
+
     setIsExporting(true);
     try {
       await exportCharacterRecord(state);
@@ -329,7 +341,7 @@ export default function Settings() {
             <SettingRow
               icon={<Download size={18} color={theme.accent} strokeWidth={2} />}
               label="Export character record"
-              sublabel="Download your progress data"
+              sublabel={isPro ? 'Download your progress data' : 'Pro feature'}
               onPress={handleExport}
               showChevron
               theme={theme}

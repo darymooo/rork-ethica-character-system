@@ -1,5 +1,4 @@
 import { useEthica } from '@/contexts/EthicaContext';
-import { VIRTUES } from '@/constants/virtues';
 import { useRouter } from 'expo-router';
 import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Alert, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,11 +7,13 @@ import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
 import { useEffect, useRef, useState } from 'react';
 import FranklinMethodModal from '@/components/FranklinMethodModal';
+import { useRevenueCat } from '@/contexts/RevenueCatContext';
 
 export default function Home() {
-  const { state, getCycleProgress, getCurrentWeekObservations, getStreakData, isWeekComplete, isSaving } = useEthica();
+  const { state, getCycleProgress, getCurrentWeekObservations, getStreakData, isWeekComplete, isSaving, getVirtueById } = useEthica();
   const observations = getCurrentWeekObservations();
   const router = useRouter();
+  const { isPro } = useRevenueCat();
   const systemColorScheme = useColorScheme();
   const isDark = state.followSystemTheme ? systemColorScheme === 'dark' : state.darkMode;
   const theme = isDark ? colors.dark : colors.light;
@@ -23,7 +24,7 @@ export default function Home() {
   const layoutWidth = Math.min(screenWidth, 860);
   const dayCellSize = Math.min(40, Math.floor((layoutWidth - contentPadding * 2 - gridGap * 6) / 7));
 
-  const currentVirtue = VIRTUES.find(v => v.id === state.currentVirtueId);
+  const currentVirtue = getVirtueById(state.currentVirtueId);
   const cycleProgress = getCycleProgress();
   const streakData = getStreakData();
   const isFirstWeek = state.weekRecords.length === 0;
@@ -63,6 +64,22 @@ export default function Home() {
 
   const handleDayPress = (_dayIndex: number) => {
     router.push('/log-observation');
+  };
+
+  const handleAnalyticsPress = () => {
+    if (!isPro) {
+      Alert.alert(
+        'Ethica Pro required',
+        'Advanced analytics and insights are part of Ethica Pro.',
+        [
+          { text: 'Not now', style: 'cancel' },
+          { text: 'Upgrade', onPress: () => router.push({ pathname: '/paywall', params: { returnTo: '/home' } }) },
+        ]
+      );
+      return;
+    }
+
+    router.push('/analytics');
   };
 
   if (!currentVirtue) {
@@ -130,7 +147,7 @@ export default function Home() {
               <BookOpen size={24} color={theme.text} strokeWidth={1.5} />
             </TouchableOpacity>
             <TouchableOpacity 
-              onPress={() => router.push('/analytics')}
+              onPress={handleAnalyticsPress}
               activeOpacity={0.7}
               accessibilityLabel="Analytics"
               accessibilityRole="button"

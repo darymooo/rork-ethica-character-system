@@ -103,17 +103,7 @@ export default function Paywall() {
 
   const navigateBack = useCallback(() => {
     console.log('Closing paywall', { returnTo });
-    if (returnTo) {
-      router.replace(returnTo as never);
-      return;
-    }
-
-    if (router.canGoBack()) {
-      router.back();
-      return;
-    }
-
-    router.replace('/home');
+    router.replace((returnTo ?? '/home') as never);
   }, [returnTo, router]);
 
   const selectedRevenueCatPackage = selectedPlan === 'monthly' ? monthlyPackage : weeklyPackage;

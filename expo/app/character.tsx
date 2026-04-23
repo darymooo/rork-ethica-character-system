@@ -1,5 +1,4 @@
 import { useEthica } from '@/contexts/EthicaContext';
-import { VIRTUES } from '@/constants/virtues';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
@@ -9,7 +8,7 @@ import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
 
 export default function Character() {
-  const { state, getVirtueHistory } = useEthica();
+  const { state, getVirtueHistory, getAllVirtues } = useEthica();
   const router = useRouter();
   const systemColorScheme = useColorScheme();
   const isDark = state.followSystemTheme ? systemColorScheme === 'dark' : state.darkMode;
@@ -17,7 +16,7 @@ export default function Character() {
   const [expandedVirtueId, setExpandedVirtueId] = useState<string | null>(null);
 
   const virtueStats = useMemo(() => {
-    return VIRTUES.map(virtue => {
+    return getAllVirtues().map(virtue => {
       const history = getVirtueHistory(virtue.id);
       const totalWeeks = history.length;
       const totalFaults = history.reduce((sum, week) => {
@@ -31,7 +30,7 @@ export default function Character() {
         history,
       };
     }).filter(stat => stat.totalWeeks > 0);
-  }, [getVirtueHistory]);
+  }, [getAllVirtues, getVirtueHistory]);
 
   const totalWeeksPracticed = virtueStats.reduce((sum, stat) => sum + stat.totalWeeks, 0);
 
@@ -114,7 +113,7 @@ export default function Character() {
                             Precept
                           </Text>
                           <Text style={[styles.virtueDescriptionText, { color: theme.text }]}>
-                            {stat.virtue.fullDescription}
+                            {stat.virtue.fullDescription ?? stat.virtue.description}
                           </Text>
                         </View>
                         <View style={[styles.detailsDivider, { backgroundColor: theme.borderLight }]} />
@@ -129,10 +128,10 @@ export default function Character() {
                         <View style={[styles.detailsDivider, { backgroundColor: theme.borderLight }]} />
                         <View style={styles.quoteSection}>
                           <Text style={[styles.quote, { color: theme.text }]}>
-                            &ldquo;{stat.virtue.quote}&rdquo;
+                            &ldquo;{stat.virtue.isCustom ? stat.virtue.context : (stat.virtue.quote ?? stat.virtue.description)}&rdquo;
                           </Text>
                           <Text style={[styles.quoteAttribution, { color: theme.textTertiary }]}>
-                            — Benjamin Franklin
+                            {stat.virtue.isCustom ? '— Your custom virtue' : '— Benjamin Franklin'}
                           </Text>
                         </View>
                         <View style={[styles.detailsDivider, { backgroundColor: theme.borderLight }]} />
