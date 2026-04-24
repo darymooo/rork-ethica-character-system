@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 32,
     paddingBottom: 32,
     gap: 16,
   },
@@ -287,8 +287,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
+    borderRadius: 12,
+    borderWidth: 2,
     gap: 12,
   },
   proIconContainer: {
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   },
   addForm: {
     padding: 20,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     gap: 20,
   },
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   },
   virtueCard: {
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     gap: 8,
   },
