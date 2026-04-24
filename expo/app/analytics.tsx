@@ -3,9 +3,10 @@ import { useRouter } from 'expo-router';
 
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Flame, Target, TrendingUp, Award, Calendar, Zap } from 'lucide-react-native';
+import { ArrowLeft, Flame, Target, TrendingUp, Award, Calendar, Zap, Sparkles } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
+import { useRevenueCat } from '@/contexts/RevenueCatContext';
 
 export default function Analytics() {
   const { state, getDetailedAnalytics, getStreakData, getVirtueStatistics, getVirtueById } = useEthica();
@@ -17,6 +18,7 @@ export default function Analytics() {
   const analytics = getDetailedAnalytics();
   const streakData = getStreakData();
   const virtueStats = getVirtueStatistics();
+  const { isPro } = useRevenueCat();
   const { width: screenWidth } = useWindowDimensions();
   const isSmallScreen = screenWidth < 380;
 
@@ -56,7 +58,23 @@ export default function Analytics() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {hasData ? (
+        {!isPro ? (
+          <View style={[styles.lockedCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={[styles.lockedIconWrap, { backgroundColor: theme.accent + '16' }]}>
+              <Sparkles size={20} color={theme.accent} strokeWidth={1.8} />
+            </View>
+            <Text style={[styles.lockedTitle, { color: theme.text }]}>Ethica Pro required</Text>
+            <Text style={[styles.lockedText, { color: theme.textSecondary }]}>Advanced analytics and insights unlock after purchase.</Text>
+            <TouchableOpacity
+              style={[styles.lockedButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
+              onPress={() => router.push({ pathname: '/paywall', params: { returnTo: '/analytics' } })}
+              activeOpacity={0.7}
+              testID="analytics-upgrade-button"
+            >
+              <Text style={[styles.lockedButtonText, { color: theme.text }]}>Upgrade to Ethica Pro</Text>
+            </TouchableOpacity>
+          </View>
+        ) : hasData ? (
           <>
             <View style={styles.streakSection}>
               <View style={[styles.streakCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
@@ -301,7 +319,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 32,
   },
   streakSection: {
@@ -312,7 +330,7 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
     paddingHorizontal: 24,
     borderWidth: 1,
-    borderRadius: 0,
+    borderRadius: 16,
   },
   streakIconContainer: {
     marginBottom: 12,
@@ -362,7 +380,7 @@ const styles = StyleSheet.create({
     width: '47%',
     padding: 16,
     borderWidth: 1,
-    borderRadius: 0,
+    borderRadius: 16,
     alignItems: 'center',
     gap: 8,
   },
@@ -476,6 +494,41 @@ const styles = StyleSheet.create({
   virtueProgressFill: {
     height: '100%',
     borderRadius: 2,
+  },
+  lockedCard: {
+    marginTop: 12,
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  lockedIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lockedTitle: {
+    ...typography.serif.semibold,
+    fontSize: sizes.title,
+  },
+  lockedText: {
+    ...typography.sans.regular,
+    fontSize: sizes.body,
+    lineHeight: 22,
+  },
+  lockedButton: {
+    marginTop: 4,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  lockedButtonText: {
+    ...typography.sans.semibold,
+    fontSize: sizes.label,
   },
   emptyState: {
     flex: 1,

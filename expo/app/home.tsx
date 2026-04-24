@@ -1,12 +1,11 @@
 import { useEthica } from '@/contexts/EthicaContext';
 import { useRouter } from 'expo-router';
-import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Alert, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, useColorScheme, Alert, useWindowDimensions, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Menu, User, BookOpen, Info, Database, Flame, BarChart3, CheckCircle, Feather } from 'lucide-react-native';
+import { Menu, User, BookOpen, Database, Flame, BarChart3, CheckCircle, Feather } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
-import { useEffect, useRef, useState } from 'react';
-import FranklinMethodModal from '@/components/FranklinMethodModal';
+import { useEffect, useRef } from 'react';
 import { useRevenueCat } from '@/contexts/RevenueCatContext';
 
 export default function Home() {
@@ -27,15 +26,13 @@ export default function Home() {
   const currentVirtue = getVirtueById(state.currentVirtueId);
   const cycleProgress = getCycleProgress();
   const streakData = getStreakData();
-  const isFirstWeek = state.weekRecords.length === 0;
   const weekComplete = isWeekComplete();
   const hasShownWeekCompleteAlert = useRef(false);
-  const [showInfoModal, setShowInfoModal] = useState(false);
 
   useEffect(() => {
     if (weekComplete && currentVirtue && !hasShownWeekCompleteAlert.current) {
       hasShownWeekCompleteAlert.current = true;
-      
+
       setTimeout(() => {
         Alert.alert(
           'Week Complete! 🎉',
@@ -54,9 +51,15 @@ export default function Home() {
       }, 500);
     }
   }, [weekComplete, currentVirtue, router]);
-  
+
+  useEffect(() => {
+    if (!currentVirtue) {
+      router.replace('/virtue-selection');
+    }
+  }, [currentVirtue, router]);
+
   const getDayOfWeek = (index: number): string => {
-    const days = state.weekStartsMonday 
+    const days = state.weekStartsMonday
       ? ['M', 'T', 'W', 'T', 'F', 'S', 'S']
       : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     return days[index];
@@ -85,27 +88,8 @@ export default function Home() {
   if (!currentVirtue) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
-        <View style={[styles.pageShell, { maxWidth: layoutWidth }]}> 
-        <View style={styles.emptyStateContainer}>
-          <Text style={[styles.emptyStateTitle, { color: theme.text }]}>
-            No virtue selected
-          </Text>
-          <Text style={[styles.emptyStateText, { color: theme.textSecondary }]}>
-            Select a virtue to begin your week of practice.
-          </Text>
-          <TouchableOpacity
-            style={[styles.logButton, { borderColor: theme.border, marginTop: 24 }]}
-            onPress={() => router.replace('/virtue-selection')}
-            activeOpacity={0.7}
-            accessibilityLabel="Select a virtue to begin"
-            accessibilityRole="button"
-            testID="select-virtue-button"
-          >
-            <Text style={[styles.logButtonText, { color: theme.text }]}>
-              Select Virtue
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <View style={[styles.pageShell, styles.loadingStateContainer, { maxWidth: layoutWidth }]}> 
+          <ActivityIndicator size="small" color={theme.textTertiary} testID="home-redirect-loading" />
         </View>
       </SafeAreaView>
     );
@@ -114,248 +98,206 @@ export default function Home() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
       <View style={[styles.pageShell, { maxWidth: layoutWidth }]}> 
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.iconButton}
-          onPress={() => router.push('/settings')}
-          activeOpacity={0.7}
-          accessibilityLabel="Settings"
-          accessibilityRole="button"
-          testID="settings-button"
-        >
-          <Menu size={24} color={theme.text} strokeWidth={1.5} />
-        </TouchableOpacity>
-        
-        <View style={styles.headerCenter}>
-          <View style={styles.headerActions}>
-            <TouchableOpacity 
-              onPress={() => router.push('/personal-journal')}
-              activeOpacity={0.7}
-              accessibilityLabel="Personal Journal"
-              accessibilityRole="button"
-              testID="personal-journal-button"
-            >
-              <Feather size={24} color={theme.text} strokeWidth={1.5} />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={() => router.push('/journal')}
-              activeOpacity={0.7}
-              accessibilityLabel="Virtue Journal"
-              accessibilityRole="button"
-              testID="journal-button"
-            >
-              <BookOpen size={24} color={theme.text} strokeWidth={1.5} />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={handleAnalyticsPress}
-              activeOpacity={0.7}
-              accessibilityLabel="Analytics"
-              accessibilityRole="button"
-              testID="analytics-button"
-            >
-              <BarChart3 size={24} color={theme.text} strokeWidth={1.5} />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.offlineIndicator}>
-            <Database size={10} color={theme.textTertiary} strokeWidth={2} />
-            <Text style={[styles.offlineText, { color: theme.textTertiary }]}>
-              {isSaving ? 'Saving...' : 'Saved locally'}
-            </Text>
-          </View>
-        </View>
-
-        <TouchableOpacity 
-          style={styles.iconButton}
-          onPress={() => router.push('/profile')}
-          activeOpacity={0.7}
-          accessibilityLabel="Profile"
-          accessibilityRole="button"
-          testID="profile-button"
-        >
-          <User size={24} color={theme.text} strokeWidth={1.5} />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.content}>
-        <View style={styles.virtueSection}>
-          <View style={styles.topStatsRow}>
-            {streakData.currentStreak > 0 && (
-              <View style={[styles.streakBadge, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                <Flame size={16} color="#E8834A" strokeWidth={2} />
-                <Text style={[styles.streakText, { color: theme.text }]}>
-                  {streakData.currentStreak}
-                </Text>
-              </View>
-            )}
-            <View style={[styles.progressRing, { borderColor: theme.borderLight }]}>
-              <View 
-                style={[
-                  styles.progressRingFill, 
-                  { 
-                    borderColor: theme.accent,
-                    transform: [{ rotate: `${(cycleProgress.percentage * 3.6) - 90}deg` }]
-                  }
-                ]} 
-              />
-              <View style={[styles.progressRingInner, { backgroundColor: theme.background }]}>
-                <Text style={[styles.cycleProgressText, { color: theme.text }]}>
-                  {cycleProgress.current}
-                </Text>
-                <Text style={[styles.cycleProgressTotal, { color: theme.textTertiary }]}>of 13</Text>
-              </View>
-            </View>
-            {streakData.longestStreak > 0 && streakData.longestStreak > streakData.currentStreak && (
-              <View style={[styles.bestStreakBadge, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                <Text style={[styles.bestStreakLabel, { color: theme.textTertiary }]}>Best</Text>
-                <Text style={[styles.bestStreakText, { color: theme.text }]}>
-                  {streakData.longestStreak}
-                </Text>
-              </View>
-            )}
-          </View>
-          <Text style={[styles.virtueName, { color: theme.text }]}>
-            {currentVirtue.name}
-          </Text>
-          <Text style={[styles.virtueDescription, { color: theme.textSecondary }]}>
-            {currentVirtue.fullDescription}
-          </Text>
-          <Text style={[styles.weekLabel, { color: theme.textTertiary }]}>
-            This week’s observation
-          </Text>
-        </View>
-
-        {weekComplete && (
-          <TouchableOpacity 
-            style={[styles.weekCompleteBanner, { backgroundColor: theme.accent }]}
-            onPress={() => router.push('/week-review')}
-            activeOpacity={0.8}
-            accessibilityLabel="This week is complete. Review your observations and select the next virtue"
-            accessibilityRole="button"
-            testID="week-complete-banner"
-          >
-            <View style={styles.weekCompleteContent}>
-              <CheckCircle size={20} color="#FFFFFF" strokeWidth={2} />
-              <View style={styles.weekCompleteTextContainer}>
-                <Text style={styles.weekCompleteTitle}>Week Complete</Text>
-                <Text style={styles.weekCompleteSubtitle}>Tap to review and choose your next virtue</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        )}
-
-        {isFirstWeek && !weekComplete && (
-          <TouchableOpacity 
-            style={[styles.tipCard, { backgroundColor: theme.surface, borderColor: theme.accent }]}
-            onPress={() => setShowInfoModal(true)}
-            activeOpacity={0.7}
-            accessibilityLabel="Learn about Franklin's Method"
-            accessibilityRole="button"
-          >
-            <View style={styles.tipHeader}>
-              <Info size={16} color={theme.accent} strokeWidth={2} />
-              <Text style={[styles.tipTitle, { color: theme.accent }]}>Your First Week</Text>
-            </View>
-            <Text style={[styles.tipText, { color: theme.textSecondary }]}>
-              Franklin quietly noted each fault on his virtue chart. Tap to explore his method.
-            </Text>
-          </TouchableOpacity>
-        )}
-
-        <View style={styles.gridSection}>
-          <View style={[styles.weekGrid, { gap: gridGap }]}>
-            {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
-              const today = new Date().toISOString().split('T')[0];
-              let dateStr = '';
-              let isToday = false;
-              let isFuture = false;
-              
-              if (state.currentWeekStartDate) {
-                const startDate = new Date(state.currentWeekStartDate);
-                const date = new Date(startDate);
-                date.setDate(date.getDate() + dayIndex);
-                dateStr = date.toISOString().split('T')[0];
-                isToday = dateStr === today;
-                isFuture = dateStr > today;
-              }
-              
-              const obs = observations.find(o => o.date === dateStr);
-              const isLogged = obs !== undefined;
-              const hasFault = obs?.hasFault;
-              
-              return (
-                <TouchableOpacity
-                  key={dayIndex}
-                  style={styles.dayColumn}
-                  onPress={() => handleDayPress(dayIndex)}
-                  activeOpacity={0.7}
-                  disabled={isFuture}
-                  accessibilityLabel={`${getDayOfWeek(dayIndex)}${isToday ? ', today' : ''}${isLogged ? (hasFault ? ', fault observed' : ', no fault') : ', not logged'}${isFuture ? ', future date' : ''}`}
-                  accessibilityRole="button"
-                  accessibilityState={{ disabled: isFuture }}
-                  testID={`day-${dayIndex}`}
-                >
-                  <Text style={[
-                    styles.dayLabel, 
-                    { color: isToday ? theme.accent : theme.textTertiary }
-                  ]}>
-                    {getDayOfWeek(dayIndex)}
-                  </Text>
-                  <View style={[
-                    styles.dayCell, 
-                    { 
-                      width: dayCellSize,
-                      height: dayCellSize,
-                      borderColor: isToday ? theme.accent : theme.border,
-                      borderWidth: isToday ? 2 : 1,
-                      backgroundColor: isLogged && !hasFault ? theme.text : 'transparent',
-                      opacity: isFuture ? 0.4 : 1,
-                    }
-                  ]}>
-                    {hasFault && (
-                      <View style={[styles.faultDot, { backgroundColor: theme.faultDot }]} />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-
-        <View style={styles.footer}>
+        <View style={styles.header}>
           <TouchableOpacity
-            style={[styles.logButton, { borderColor: theme.border }]}
-            onPress={() => handleDayPress(0)}
+            style={styles.iconButton}
+            onPress={() => router.push('/settings')}
             activeOpacity={0.7}
-            accessibilityLabel="Log observation for today"
+            accessibilityLabel="Settings"
             accessibilityRole="button"
-            testID="log-observation-button"
+            testID="settings-button"
           >
-            <Text style={[styles.logButtonText, { color: theme.text }]}>
-              Log Observation
-            </Text>
+            <Menu size={24} color={theme.text} strokeWidth={1.5} />
           </TouchableOpacity>
 
-          {state.currentWeekStartDate && (
-            <TouchableOpacity
-              style={styles.reviewButton}
-              onPress={() => router.push('/week-review')}
-              activeOpacity={0.7}
-              accessibilityLabel="Complete week and review"
-              accessibilityRole="button"
-              testID="complete-week-button"
-            >
-              <Text style={[styles.reviewButtonText, { color: theme.textSecondary }]}>
-                Complete Week
+          <View style={styles.headerCenter}>
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                onPress={() => router.push('/personal-journal')}
+                activeOpacity={0.7}
+                accessibilityLabel="Personal Journal"
+                accessibilityRole="button"
+                testID="personal-journal-button"
+              >
+                <Feather size={24} color={theme.text} strokeWidth={1.5} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.push('/journal')}
+                activeOpacity={0.7}
+                accessibilityLabel="Virtue Journal"
+                accessibilityRole="button"
+                testID="journal-button"
+              >
+                <BookOpen size={24} color={theme.text} strokeWidth={1.5} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleAnalyticsPress}
+                activeOpacity={0.7}
+                accessibilityLabel="Analytics"
+                accessibilityRole="button"
+                testID="analytics-button"
+              >
+                <BarChart3 size={24} color={theme.text} strokeWidth={1.5} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.offlineIndicator}>
+              <Database size={10} color={theme.textTertiary} strokeWidth={2} />
+              <Text style={[styles.offlineText, { color: theme.textTertiary }]}>
+                {isSaving ? 'Saving...' : 'Saved locally'}
               </Text>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => router.push('/profile')}
+            activeOpacity={0.7}
+            accessibilityLabel="Profile"
+            accessibilityRole="button"
+            testID="profile-button"
+          >
+            <User size={24} color={theme.text} strokeWidth={1.5} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.content}>
+          <View style={styles.virtueSection}>
+            <View style={styles.topStatsRow}>
+              {streakData.currentStreak > 0 && (
+                <View style={[styles.streakBadge, { backgroundColor: theme.surface, borderColor: theme.border }]}> 
+                  <Flame size={16} color="#E8834A" strokeWidth={2} />
+                  <Text style={[styles.streakText, { color: theme.text }]}>{streakData.currentStreak}</Text>
+                </View>
+              )}
+              <View style={[styles.progressRing, { borderColor: theme.borderLight }]}> 
+                <View
+                  style={[
+                    styles.progressRingFill,
+                    {
+                      borderColor: theme.accent,
+                      transform: [{ rotate: `${(cycleProgress.percentage * 3.6) - 90}deg` }],
+                    },
+                  ]}
+                />
+                <View style={[styles.progressRingInner, { backgroundColor: theme.background }]}>
+                  <Text style={[styles.cycleProgressText, { color: theme.text }]}>{cycleProgress.current}</Text>
+                  <Text style={[styles.cycleProgressTotal, { color: theme.textTertiary }]}>of 13</Text>
+                </View>
+              </View>
+              {streakData.longestStreak > 0 && streakData.longestStreak > streakData.currentStreak && (
+                <View style={[styles.bestStreakBadge, { backgroundColor: theme.surface, borderColor: theme.border }]}> 
+                  <Text style={[styles.bestStreakLabel, { color: theme.textTertiary }]}>Best</Text>
+                  <Text style={[styles.bestStreakText, { color: theme.text }]}>{streakData.longestStreak}</Text>
+                </View>
+              )}
+            </View>
+            <Text style={[styles.virtueName, { color: theme.text }]}>{currentVirtue.name}</Text>
+            <Text style={[styles.virtueDescription, { color: theme.textSecondary }]}>{currentVirtue.fullDescription}</Text>
+            <Text style={[styles.weekLabel, { color: theme.textTertiary }]}>This week’s observation</Text>
+          </View>
+
+          {weekComplete && (
+            <TouchableOpacity
+              style={[styles.weekCompleteBanner, { backgroundColor: theme.accent }]}
+              onPress={() => router.push('/week-review')}
+              activeOpacity={0.8}
+              accessibilityLabel="This week is complete. Review your observations and select the next virtue"
+              accessibilityRole="button"
+              testID="week-complete-banner"
+            >
+              <View style={styles.weekCompleteContent}>
+                <CheckCircle size={20} color="#FFFFFF" strokeWidth={2} />
+                <View style={styles.weekCompleteTextContainer}>
+                  <Text style={styles.weekCompleteTitle}>Week Complete</Text>
+                  <Text style={styles.weekCompleteSubtitle}>Tap to review and choose your next virtue</Text>
+                </View>
+              </View>
             </TouchableOpacity>
           )}
-        </View>
-      </View>
 
-      <FranklinMethodModal 
-        visible={showInfoModal}
-        onClose={() => setShowInfoModal(false)}
-      />
+          <View style={styles.gridSection}>
+            <View style={[styles.weekGrid, { gap: gridGap }]}> 
+              {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
+                const today = new Date().toISOString().split('T')[0];
+                let dateStr = '';
+                let isToday = false;
+                let isFuture = false;
+
+                if (state.currentWeekStartDate) {
+                  const startDate = new Date(state.currentWeekStartDate);
+                  const date = new Date(startDate);
+                  date.setDate(date.getDate() + dayIndex);
+                  dateStr = date.toISOString().split('T')[0];
+                  isToday = dateStr === today;
+                  isFuture = dateStr > today;
+                }
+
+                const obs = observations.find((observation) => observation.date === dateStr);
+                const isLogged = obs !== undefined;
+                const hasFault = obs?.hasFault;
+
+                return (
+                  <TouchableOpacity
+                    key={dayIndex}
+                    style={styles.dayColumn}
+                    onPress={() => handleDayPress(dayIndex)}
+                    activeOpacity={0.7}
+                    disabled={isFuture}
+                    accessibilityLabel={`${getDayOfWeek(dayIndex)}${isToday ? ', today' : ''}${isLogged ? (hasFault ? ', fault observed' : ', no fault') : ', not logged'}${isFuture ? ', future date' : ''}`}
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: isFuture }}
+                    testID={`day-${dayIndex}`}
+                  >
+                    <Text style={[styles.dayLabel, { color: isToday ? theme.accent : theme.textTertiary }]}>
+                      {getDayOfWeek(dayIndex)}
+                    </Text>
+                    <View
+                      style={[
+                        styles.dayCell,
+                        {
+                          width: dayCellSize,
+                          height: dayCellSize,
+                          borderColor: isToday ? theme.accent : theme.border,
+                          borderWidth: isToday ? 2 : 1,
+                          backgroundColor: isLogged && !hasFault ? theme.text : 'transparent',
+                          opacity: isFuture ? 0.4 : 1,
+                        },
+                      ]}
+                    >
+                      {hasFault && <View style={[styles.faultDot, { backgroundColor: theme.faultDot }]} />}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            <TouchableOpacity
+              style={[styles.logButton, { borderColor: theme.border, backgroundColor: theme.surface }]}
+              onPress={() => handleDayPress(0)}
+              activeOpacity={0.7}
+              accessibilityLabel="Log observation for today"
+              accessibilityRole="button"
+              testID="log-observation-button"
+            >
+              <Text style={[styles.logButtonText, { color: theme.text }]}>Log Observation</Text>
+            </TouchableOpacity>
+
+            {state.currentWeekStartDate && (
+              <TouchableOpacity
+                style={styles.reviewButton}
+                onPress={() => router.push('/week-review')}
+                activeOpacity={0.7}
+                accessibilityLabel="Complete week and review"
+                accessibilityRole="button"
+                testID="complete-week-button"
+              >
+                <Text style={[styles.reviewButtonText, { color: theme.textSecondary }]}>Complete Week</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -369,6 +311,10 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     alignSelf: 'center',
+  },
+  loadingStateContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   header: {
     flexDirection: 'row',
@@ -551,30 +497,6 @@ const styles = StyleSheet.create({
     ...typography.sans.regular,
     fontSize: sizes.body,
   },
-  tipCard: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    gap: 8,
-    marginHorizontal: 12,
-  },
-  tipHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  tipTitle: {
-    ...typography.sans.semibold,
-    fontSize: sizes.caption,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  tipText: {
-    ...typography.sans.regular,
-    fontSize: sizes.caption,
-    lineHeight: 18,
-  },
   weekCompleteBanner: {
     marginHorizontal: -20,
     paddingVertical: 16,
@@ -598,23 +520,5 @@ const styles = StyleSheet.create({
     fontSize: sizes.caption,
     color: 'rgba(255,255,255,0.85)',
     marginTop: 2,
-  },
-  emptyStateContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  emptyStateTitle: {
-    ...typography.serif.semibold,
-    fontSize: sizes.large,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  emptyStateText: {
-    ...typography.sans.regular,
-    fontSize: sizes.body,
-    textAlign: 'center',
-    lineHeight: 24,
   },
 });

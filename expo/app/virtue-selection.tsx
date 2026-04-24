@@ -336,11 +336,7 @@ export default function VirtueSelection() {
                 >
                   {franklinVirtues.map((virtue) => renderVirtueRow(virtue, 'franklin'))}
                 </Animated.View>
-              ) : (
-                <View style={[styles.collapsedHint, { borderColor: theme.border, backgroundColor: theme.surface }]}> 
-                  <Text style={[styles.collapsedHintText, { color: theme.textSecondary }]}>Collapsed by default to keep the selection screen compact.</Text>
-                </View>
-              )}
+              ) : null}
             </View>
 
             <View style={styles.column}>
@@ -379,8 +375,14 @@ export default function VirtueSelection() {
                   activeOpacity={0.78}
                   testID="locked-custom-virtues-panel"
                 >
-                  <Text style={[styles.lockedTitle, { color: theme.text }]}>Unlock custom virtues</Text>
-                  <Text style={[styles.lockedText, { color: theme.textSecondary }]}>Create your own virtues with a subtle premium upgrade path.</Text>
+                  <View style={styles.lockedPanelHeader}>
+                    <Text style={[styles.lockedTitle, { color: theme.text }]}>Unlock custom virtues</Text>
+                    <View style={[styles.premiumInlineTag, { backgroundColor: theme.accent + '14', borderColor: theme.accent + '35' }]}>
+                      <Sparkles size={10} color={theme.accent} strokeWidth={2} />
+                      <Text style={[styles.premiumInlineTagText, { color: theme.accent }]}>Ethica Pro</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.lockedText, { color: theme.textSecondary }]}>Create and use your own principles with the same weekly focus flow as Franklin’s virtues.</Text>
                 </TouchableOpacity>
               ) : customVirtueItems.length > 0 ? (
                 <View style={styles.sectionBody}>
@@ -525,17 +527,6 @@ const styles = StyleSheet.create({
     ...typography.sans.semibold,
     fontSize: 10,
   },
-  collapsedHint: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  collapsedHintText: {
-    ...typography.sans.regular,
-    fontSize: 12,
-    lineHeight: 17,
-  },
   sectionBody: {
     gap: 8,
     overflow: 'hidden',
@@ -628,10 +619,31 @@ const styles = StyleSheet.create({
   },
   lockedPanel: {
     borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    gap: 6,
+  },
+  lockedPanelHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  premiumInlineTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  premiumInlineTagText: {
+    ...typography.sans.semibold,
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
   emptyCustomPanel: {
     borderWidth: 1,

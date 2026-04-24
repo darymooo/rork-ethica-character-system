@@ -233,13 +233,13 @@ export default function Settings() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}
       >
-      <View style={[styles.header, { backgroundColor: theme.backgroundSecondary }]}>
+      <View style={[styles.header, { backgroundColor: theme.background }]}>
         <TouchableOpacity
           style={[styles.backButton, { backgroundColor: theme.surface }]}
           onPress={() => {
@@ -455,7 +455,7 @@ export default function Settings() {
         </View>
 
         <View style={styles.footer}>
-          <View style={[styles.footerCard, { backgroundColor: theme.surface }]}>
+          <View style={[styles.footerCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <Info size={16} color={theme.textTertiary} strokeWidth={2} />
             <Text style={[styles.footerText, { color: theme.textSecondary }]}>
               Based on Benjamin Franklin&apos;s method of character formation through disciplined daily observation.
@@ -503,11 +503,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
   section: {
-    marginTop: 24,
+    marginTop: 20,
   },
   sectionTitle: {
     ...typography.sans.medium,
@@ -517,8 +517,9 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   sectionCard: {
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
+    borderWidth: 1,
   },
   settingRow: {
     flexDirection: 'row',
@@ -593,8 +594,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 12,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     marginHorizontal: 4,
+    borderWidth: 1,
   },
   footerText: {
     ...typography.sans.regular,

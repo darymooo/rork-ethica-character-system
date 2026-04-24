@@ -1,5 +1,4 @@
-import { Platform } from 'react-native';
-import * as Sharing from 'expo-sharing';
+import { Platform, Share } from 'react-native';
 import { File, Paths } from 'expo-file-system';
 import { AppState, WeekRecord } from '@/contexts/EthicaContext';
 import { VIRTUES } from '@/constants/virtues';
@@ -126,13 +125,11 @@ export const exportCharacterRecord = async (state: AppState): Promise<void> => {
       await file.create();
       await file.write(content);
       
-      const canShare = await Sharing.isAvailableAsync();
-      if (canShare) {
-        await Sharing.shareAsync(file.uri, {
-          mimeType: 'text/plain',
-          dialogTitle: 'Export Character Record',
-        });
-      }
+      await Share.share({
+        title: 'Export Character Record',
+        message: `Your Ethica character record is ready: ${file.uri}`,
+        url: file.uri,
+      });
     } catch (error) {
       console.error('Export failed:', error);
       throw error;

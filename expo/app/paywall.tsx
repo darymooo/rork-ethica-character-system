@@ -15,7 +15,6 @@ const PREMIUM_FEATURES = [
   'Track your own principles',
   'Advanced analytics & insights',
   'Export your complete journal',
-  'Priority support',
 ];
 
 type PlanKey = 'weekly' | 'monthly';
@@ -120,19 +119,6 @@ export default function Paywall() {
     return savings > 0 ? savings : 0;
   }, [monthlyPackage, weeklyPackage]);
 
-  const missingPlans = useMemo(() => {
-    const plans: string[] = [];
-
-    if (!weeklyPackage) {
-      plans.push('weekly');
-    }
-
-    if (!monthlyPackage) {
-      plans.push('monthly');
-    }
-
-    return plans;
-  }, [monthlyPackage, weeklyPackage]);
 
   const handleClose = () => {
     navigateBack();
@@ -211,15 +197,6 @@ export default function Paywall() {
                 </View>
               ))}
             </View>
-
-            {missingPlans.length > 0 && !isLoadingOfferings ? (
-              <View style={[styles.statusCard, { backgroundColor: theme.surface, borderColor: theme.border }]}> 
-                <Text style={[styles.statusTitle, { color: theme.text }]}>Subscription setup needs attention</Text>
-                <Text style={[styles.statusText, { color: theme.textSecondary }]}> 
-                  Missing {missingPlans.join(' and ')} package{missingPlans.length > 1 ? 's' : ''} from the current RevenueCat offering.
-                </Text>
-              </View>
-            ) : null}
 
             {isPro ? (
               <View style={[styles.statusCard, { backgroundColor: theme.surface, borderColor: theme.accent }]}> 
@@ -324,7 +301,7 @@ export default function Paywall() {
               activeOpacity={0.7}
               testID="skip-button"
             >
-              <Text style={[styles.skipButtonText, { color: theme.textSecondary }]}>Skip and continue to app</Text>
+              <Text style={[styles.skipButtonText, { color: theme.textSecondary }]}>Not now</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
