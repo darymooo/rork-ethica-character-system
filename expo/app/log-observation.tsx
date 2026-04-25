@@ -1,4 +1,5 @@
 import { useEthica } from '@/contexts/EthicaContext';
+import { VIRTUES } from '@/constants/virtues';
 import { useRouter } from 'expo-router';
 import { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, useColorScheme, KeyboardAvoidingView, Platform, Animated, ScrollView, Keyboard } from 'react-native';
@@ -12,7 +13,7 @@ import { requestStoreReview, shouldTriggerReview } from '@/utils/storeReview';
 
 
 export default function LogObservation() {
-  const { state, logObservation, getCurrentWeekObservations, getVirtueById } = useEthica();
+  const { state, logObservation, getCurrentWeekObservations } = useEthica();
   const today = new Date().toISOString().split('T')[0];
   const observations = getCurrentWeekObservations();
   const existingObs = observations.find(o => o.date === today);
@@ -25,7 +26,7 @@ export default function LogObservation() {
   const isDark = state.followSystemTheme ? systemColorScheme === 'dark' : state.darkMode;
   const theme = isDark ? colors.dark : colors.light;
 
-  const currentVirtue = getVirtueById(state.currentVirtueId);
+  const currentVirtue = VIRTUES.find(v => v.id === state.currentVirtueId);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;

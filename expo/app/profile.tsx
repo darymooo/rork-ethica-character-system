@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Flame, Target, Calendar, Trophy, Star, Zap, Award, TrendingUp, TrendingDown, BookOpen } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
+import { VIRTUES } from '@/constants/virtues';
 import React, { useMemo } from 'react';
 
 interface Achievement {
@@ -18,7 +19,7 @@ interface Achievement {
 }
 
 export default function Profile() {
-  const { state, getDetailedAnalytics, getStreakData, getCycleProgress, getVirtueById } = useEthica();
+  const { state, getDetailedAnalytics, getStreakData, getCycleProgress } = useEthica();
   const router = useRouter();
   const systemColorScheme = useColorScheme();
   const isDark = state.followSystemTheme ? systemColorScheme === 'dark' : state.darkMode;
@@ -38,7 +39,8 @@ export default function Profile() {
   };
 
   const getVirtueName = (virtueId: string | null): string => {
-    return getVirtueById(virtueId)?.name ?? '—';
+    if (!virtueId) return '—';
+    return VIRTUES.find(v => v.id === virtueId)?.name || '—';
   };
 
   const daysSincePracticing = useMemo(() => {

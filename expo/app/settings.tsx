@@ -147,18 +147,6 @@ export default function Settings() {
 
 
   const handleExport = async () => {
-    if (!isPro) {
-      Alert.alert(
-        'Ethica Pro required',
-        'Exporting your full character record is part of Ethica Pro.',
-        [
-          { text: 'Not now', style: 'cancel' },
-          { text: 'Upgrade', onPress: () => router.push({ pathname: '/paywall', params: { returnTo: '/settings' } }) },
-        ]
-      );
-      return;
-    }
-
     setIsExporting(true);
     try {
       await exportCharacterRecord(state);
@@ -341,7 +329,7 @@ export default function Settings() {
             <SettingRow
               icon={<Download size={18} color={theme.accent} strokeWidth={2} />}
               label="Export character record"
-              sublabel={isPro ? 'Download your progress data' : 'Pro feature'}
+              sublabel="Download your progress data"
               onPress={handleExport}
               showChevron
               theme={theme}
@@ -364,7 +352,7 @@ export default function Settings() {
             <View style={[styles.sectionCard, { backgroundColor: theme.surface }]}>
               <TouchableOpacity
                 style={styles.upgradeCard}
-                onPress={() => router.push({ pathname: '/paywall', params: { returnTo: '/settings' } })}
+                onPress={() => router.push('/paywall')}
                 activeOpacity={0.7}
               >
                 <View style={[styles.upgradeIconContainer, { backgroundColor: theme.accent + '20' }]}>
@@ -394,7 +382,7 @@ export default function Settings() {
                 icon={<Sparkles size={18} color={theme.accent} strokeWidth={2} />}
                 label="Ethica Pro"
                 sublabel="Manage your subscription"
-                onPress={() => router.push({ pathname: '/paywall', params: { returnTo: '/settings' } })}
+                onPress={() => router.push('/paywall')}
                 showChevron
                 theme={theme}
                 isLast

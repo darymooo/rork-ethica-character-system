@@ -1,4 +1,5 @@
 import { useEthica } from '@/contexts/EthicaContext';
+import { VIRTUES } from '@/constants/virtues';
 import { useRouter } from 'expo-router';
 import { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
@@ -8,7 +9,7 @@ import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
 
 export default function Journal() {
-  const { state, getVirtueHistory, getAllVirtues, getVirtueById } = useEthica();
+  const { state, getVirtueHistory } = useEthica();
   const router = useRouter();
   const systemColorScheme = useColorScheme();
   const isDark = state.followSystemTheme ? systemColorScheme === 'dark' : state.darkMode;
@@ -35,7 +36,7 @@ export default function Journal() {
     );
     const avgFaultsPerWeek = totalWeeks > 0 ? (totalFaults / totalWeeks).toFixed(1) : '0';
     
-    const virtueStats = getAllVirtues().map(virtue => {
+    const virtueStats = VIRTUES.map(virtue => {
       const history = state.weekRecords.filter(r => r.virtueId === virtue.id);
       const attempts = history.length;
       const totalFaultsForVirtue = history.reduce((sum, r) => 
@@ -47,15 +48,15 @@ export default function Journal() {
       .sort((a, b) => b.attempts - a.attempts);
 
     return { totalWeeks, totalFaults, avgFaultsPerWeek, virtueStats };
-  }, [getAllVirtues, state.weekRecords]);
+  }, [state.weekRecords]);
 
   const practiceCount = useMemo(() => {
     const counts: Record<string, number> = {};
-    getAllVirtues().forEach(v => {
+    VIRTUES.forEach(v => {
       counts[v.id] = state.weekRecords.filter(r => r.virtueId === v.id).length;
     });
     return counts;
-  }, [getAllVirtues, state.weekRecords]);
+  }, [state.weekRecords]);
 
   const formatDateRange = (startDate: string, endDate: string): string => {
     const start = new Date(startDate);
@@ -192,7 +193,7 @@ export default function Journal() {
                   All
                 </Text>
               </TouchableOpacity>
-              {getAllVirtues().filter(v => practiceCount[v.id] > 0).map(virtue => (
+              {VIRTUES.filter(v => practiceCount[v.id] > 0).map(virtue => (
                 <TouchableOpacity
                   key={virtue.id}
                   style={[
@@ -237,7 +238,7 @@ export default function Journal() {
         {filteredRecords.length > 0 ? (
           <View style={styles.recordsContainer}>
             {filteredRecords.map((record, recordIndex) => {
-              const virtue = getVirtueById(record.virtueId);
+              const virtue = VIRTUES.find(v => v.id === record.virtueId);
               if (!virtue) return null;
 
               const faultCount = record.observations.filter(o => o.hasFault).length;
