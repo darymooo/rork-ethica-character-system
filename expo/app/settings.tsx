@@ -146,7 +146,23 @@ export default function Settings() {
   };
 
 
+  const openPaywallFromSettings = () => {
+    router.push({ pathname: '/paywall', params: { returnTo: 'settings' } });
+  };
+
   const handleExport = async () => {
+    if (!isPro) {
+      Alert.alert(
+        'Premium Feature',
+        'Journal export is available in Ethica Pro. Upgrade to export your complete character record.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Upgrade', onPress: openPaywallFromSettings },
+        ]
+      );
+      return;
+    }
+
     setIsExporting(true);
     try {
       await exportCharacterRecord(state);
@@ -339,7 +355,7 @@ export default function Settings() {
               icon={<ListOrdered size={18} color={theme.accent} strokeWidth={2} />}
               label="Virtue queue"
               sublabel="Plan your upcoming cycle"
-              onPress={() => router.push('/virtue-queue')}
+              onPress={isPro ? () => router.push('/virtue-queue') : openPaywallFromSettings}
               showChevron
               theme={theme}
               isLast
@@ -352,7 +368,7 @@ export default function Settings() {
             <View style={[styles.sectionCard, { backgroundColor: theme.surface }]}>
               <TouchableOpacity
                 style={styles.upgradeCard}
-                onPress={() => router.push('/paywall')}
+                onPress={openPaywallFromSettings}
                 activeOpacity={0.7}
               >
                 <View style={[styles.upgradeIconContainer, { backgroundColor: theme.accent + '20' }]}>
@@ -382,7 +398,7 @@ export default function Settings() {
                 icon={<Sparkles size={18} color={theme.accent} strokeWidth={2} />}
                 label="Ethica Pro"
                 sublabel="Manage your subscription"
-                onPress={() => router.push('/paywall')}
+                onPress={openPaywallFromSettings}
                 showChevron
                 theme={theme}
                 isLast

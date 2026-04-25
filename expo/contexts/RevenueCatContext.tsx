@@ -1,6 +1,7 @@
 import createContextHook from '@nkzw/create-context-hook';
 import type { CustomerInfo, PurchasesOfferings, PurchasesPackage } from 'react-native-purchases';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Platform } from 'react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 type PurchasesModule = typeof import('react-native-purchases');
@@ -11,7 +12,26 @@ type RevenueCatPlan = 'weekly' | 'monthly';
 let purchasesInstance: PurchasesType | null = null;
 let purchasesConfigured = false;
 
-const ENTITLEMENT_ID = 'Ethica Pro';
+const ENTITLEMENT_ALIASES = ['Ethica Pro', 'ethica_pro', 'pro', 'premium'];
+
+function hasActiveProEntitlement(customerInfo: CustomerInfo | null | undefined): boolean {
+  const activeEntitlements = customerInfo?.entitlements.active ?? {};
+  const activeKeys = Object.keys(activeEntitlements);
+  console.log('Checking active RevenueCat entitlements for Pro unlock', { activeKeys });
+
+  return ENTITLEMENT_ALIASES.some((id) => activeEntitlements[id] !== undefined) || activeKeys.length > 0;
+}
+
+function getActiveProEntitlement(customerInfo: CustomerInfo | null | undefined) {
+  const activeEntitlements = customerInfo?.entitlements.active ?? {};
+  const alias = ENTITLEMENT_ALIASES.find((id) => activeEntitlements[id] !== undefined);
+  if (alias) {
+    return activeEntitlements[alias];
+  }
+
+  const firstActiveKey = Object.keys(activeEntitlements)[0];
+  return firstActiveKey ? activeEntitlements[firstActiveKey] : undefined;
+}
 
 function getRCToken(): string | undefined {
   if (__DEV__) {
@@ -99,8 +119,6 @@ async function initializeRevenueCat(): Promise<boolean> {
     return false;
   }
 }
-
-import { Platform } from 'react-native';
 
 const revenueCatSetupPromise = initializeRevenueCat();
 
@@ -205,7 +223,7 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       return;
     }
 
-    const currentProStatus = customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
+    const currentProStatus = hasActiveProEntitlement(customerInfo);
 
     if (previousProStatus.current === null) {
       previousProStatus.current = currentProStatus;
@@ -250,7 +268,8 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
 
       try {
         const { customerInfo } = await purchases.purchasePackage(pkg);
-        return customerInfo;
+        const freshCustomerInfo = await purchases.getCustomerInfo();
+        return hasActiveProEntitlement(freshCustomerInfo) ? freshCustomerInfo : customerInfo;
       } catch (error: any) {
         if (error?.userCancelled) {
           throw new Error('Purchase cancelled');
@@ -294,7 +313,7 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       return false;
     }
 
-    return customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
+    return hasActiveProEntitlement(customerInfo);
   }, [customerInfoQuery.data]);
 
   const getProExpirationDate = useCallback((): Date | null => {
@@ -303,7 +322,7 @@ export const [RevenueCatProvider, useRevenueCat] = createContextHook(() => {
       return null;
     }
 
-    const entitlement = customerInfo.entitlements.active[ENTITLEMENT_ID];
+    const entitlement = getActiveProEntitlement(customerInfo);
     if (!entitlement?.expirationDate) {
       return null;
     }

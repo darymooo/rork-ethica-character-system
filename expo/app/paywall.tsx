@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, useColorScheme, Alert, ActivityIndicator, useWindowDimensions } from 'react-native';
 import type { GestureResponderEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import type { PurchasesPackage } from 'react-native-purchases';
 import { Check, Sparkles } from 'lucide-react-native';
@@ -45,6 +45,7 @@ function getPackagePrice(pkg: PurchasesPackage | null, fallback: string): string
 
 export default function Paywall() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ returnTo?: string }>();
   const systemColorScheme = useColorScheme();
   const { state } = useEthica();
   const { width } = useWindowDimensions();
@@ -118,8 +119,11 @@ export default function Paywall() {
     return plans;
   }, [monthlyPackage, weeklyPackage]);
 
+  const closeDestination = params.returnTo === 'settings' ? '/settings' : '/virtue-selection';
+
   const handleClose = () => {
-    router.replace('/virtue-selection');
+    console.log('Closing paywall', { closeDestination, isPro });
+    router.replace(closeDestination);
   };
 
   const handlePurchase = async () => {
@@ -136,7 +140,7 @@ export default function Paywall() {
       Alert.alert(
         'Success!',
         'Welcome to Ethica Pro! You now have access to all premium features.',
-        [{ text: 'Continue', onPress: () => router.replace('/virtue-selection') }]
+        [{ text: 'Continue', onPress: () => router.replace(closeDestination) }]
       );
     } catch (error: any) {
       if (error?.message !== 'Purchase cancelled') {
@@ -163,7 +167,7 @@ export default function Paywall() {
       Alert.alert(
         'Restore Complete',
         'Your purchases have been restored.',
-        [{ text: 'OK', onPress: () => router.replace('/virtue-selection') }]
+        [{ text: 'OK', onPress: () => router.replace(closeDestination) }]
       );
     } catch (error: any) {
       Alert.alert('Restore Failed', error?.message || 'Could not restore purchases. Please try again.');
