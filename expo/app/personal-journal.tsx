@@ -14,6 +14,7 @@ import {
   Alert,
   Animated,
   Keyboard,
+  InputAccessoryView,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -46,6 +47,7 @@ const MOODS: { id: MoodType; label: string; icon: typeof Heart }[] = [
 ];
 
 export default function PersonalJournal() {
+  const accessoryID = 'personal-journal-done-toolbar';
   const { state, addJournalEntry, updateJournalEntry, deleteJournalEntry, getJournalEntries } = useEthica();
   const router = useRouter();
   const systemColorScheme = useColorScheme();
@@ -274,6 +276,9 @@ export default function PersonalJournal() {
               value={searchQuery}
               onChangeText={setSearchQuery}
               autoFocus
+              returnKeyType="done"
+              inputAccessoryViewID={accessoryID}
+              onSubmitEditing={Keyboard.dismiss}
               testID="search-input"
             />
             {searchQuery.length > 0 && (
@@ -492,11 +497,23 @@ export default function PersonalJournal() {
               multiline
               autoFocus
               textAlignVertical="top"
+              returnKeyType="done"
+              inputAccessoryViewID={accessoryID}
+              onSubmitEditing={Keyboard.dismiss}
               testID="composer-input"
             />
           </Animated.View>
         )}
       </KeyboardAvoidingView>
+      {Platform.OS === 'ios' ? (
+        <InputAccessoryView nativeID={accessoryID}>
+          <View style={[styles.keyboardToolbar, { backgroundColor: theme.surface, borderTopColor: theme.border }]}> 
+            <TouchableOpacity onPress={Keyboard.dismiss} activeOpacity={0.7} style={styles.keyboardDoneButton}>
+              <Text style={[styles.keyboardDoneText, { color: theme.accent }]}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </InputAccessoryView>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -753,5 +770,20 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     minHeight: 120,
     maxHeight: 200,
+  },
+  keyboardToolbar: {
+    minHeight: 44,
+    borderTopWidth: 1,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  keyboardDoneButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  keyboardDoneText: {
+    ...typography.sans.semibold,
+    fontSize: sizes.label,
   },
 });

@@ -2,7 +2,7 @@ import { useEthica } from '@/contexts/EthicaContext';
 import { VIRTUES } from '@/constants/virtues';
 import { useRouter } from 'expo-router';
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, useColorScheme, KeyboardAvoidingView, Platform, Animated, ScrollView, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, useColorScheme, KeyboardAvoidingView, Platform, Animated, ScrollView, Keyboard, InputAccessoryView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { X, Check, CircleAlert } from 'lucide-react-native';
 import colors from '@/constants/colors';
@@ -25,6 +25,7 @@ export default function LogObservation() {
   const systemColorScheme = useColorScheme();
   const isDark = state.followSystemTheme ? systemColorScheme === 'dark' : state.darkMode;
   const theme = isDark ? colors.dark : colors.light;
+  const accessoryID = 'log-observation-done-toolbar';
 
   const currentVirtue = VIRTUES.find(v => v.id === state.currentVirtueId);
 
@@ -354,6 +355,7 @@ export default function LogObservation() {
                 numberOfLines={3}
                 textAlignVertical="top"
                 returnKeyType="done"
+                inputAccessoryViewID={accessoryID}
                 blurOnSubmit={true}
                 onSubmitEditing={Keyboard.dismiss}
                 onFocus={() => {
@@ -414,6 +416,15 @@ export default function LogObservation() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+      {Platform.OS === 'ios' ? (
+        <InputAccessoryView nativeID={accessoryID}>
+          <View style={[styles.keyboardToolbar, { backgroundColor: theme.surface, borderTopColor: theme.border }]}> 
+            <TouchableOpacity onPress={Keyboard.dismiss} activeOpacity={0.7} style={styles.keyboardDoneButton}>
+              <Text style={[styles.keyboardDoneText, { color: theme.accent }]}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </InputAccessoryView>
+      ) : null}
 
       {showToast && (
         <Animated.View 
@@ -656,5 +667,20 @@ const styles = StyleSheet.create({
   toastText: {
     ...typography.serif.semibold,
     fontSize: sizes.large,
+  },
+  keyboardToolbar: {
+    minHeight: 44,
+    borderTopWidth: 1,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  keyboardDoneButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  keyboardDoneText: {
+    ...typography.sans.semibold,
+    fontSize: sizes.label,
   },
 });

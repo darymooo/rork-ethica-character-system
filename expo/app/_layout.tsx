@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
+import { Keyboard, Platform, TouchableWithoutFeedback } from "react-native";
+import * as SystemUI from "expo-system-ui";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { EthicaProvider, useEthica } from "@/contexts/EthicaContext";
 import { RevenueCatProvider } from "@/contexts/RevenueCatContext";
@@ -29,8 +31,13 @@ function RootLayoutNav() {
   const [hasHiddenSplash, setHasHiddenSplash] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log("RootLayoutNav: isLoading changed", { isLoading });
-  }, [isLoading]);
+    if (Platform.OS === "web" && typeof document !== "undefined") {
+      const style = document.createElement("style");
+      style.textContent = `button, [role="button"], a { touch-action: manipulation; -webkit-tap-highlight-color: transparent; } @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; } }`;
+      document.head.appendChild(style);
+      return () => document.head.removeChild(style);
+    }
+  }, []);
 
   useEffect(() => {
     const hideSplash = async () => {
@@ -49,7 +56,16 @@ function RootLayoutNav() {
   }, [hasHiddenSplash, isLoading]);
 
   return (
-    <Stack screenOptions={{ headerShown: false, headerBackTitle: "Back" }}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false} touchSoundDisabled>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          headerBackTitle: "Back",
+          animation: Platform.OS === "ios" ? "slide_from_right" : "fade_from_bottom",
+          animationDuration: 260,
+          contentStyle: { backgroundColor: "#F6F1E8" },
+        }}
+      >
       <Stack.Screen name="index" />
       <Stack.Screen name="onboarding" />
       <Stack.Screen name="virtue-selection" />
@@ -66,12 +82,17 @@ function RootLayoutNav() {
       <Stack.Screen name="policies" />
       <Stack.Screen name="personal-journal" />
       <Stack.Screen name="custom-virtues" />
-      <Stack.Screen name="paywall" options={{ presentation: "fullScreenModal" }} />
-    </Stack>
+      <Stack.Screen name="paywall" options={{ presentation: "fullScreenModal", animation: "slide_from_bottom" }} />
+      </Stack>
+    </TouchableWithoutFeedback>
   );
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    void SystemUI.setBackgroundColorAsync("#F6F1E8");
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1 }}>

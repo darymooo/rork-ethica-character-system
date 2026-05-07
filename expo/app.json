@@ -14,7 +14,7 @@
       "backgroundColor": "#E8DECC"
     },
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "bundleIdentifier": "app.rork.ethica-character-system-az74np5"
     },
     "android": {

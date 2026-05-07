@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, useColorScheme, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, useColorScheme, Alert, Keyboard, InputAccessoryView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -21,6 +21,7 @@ export default function CustomVirtues() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [context, setContext] = useState('');
+  const accessoryID = 'custom-virtues-done-toolbar';
 
   const handleAdd = () => {
     if (!isPro) {
@@ -99,6 +100,7 @@ export default function CustomVirtues() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {!isPro && (
           <TouchableOpacity
@@ -139,6 +141,9 @@ export default function CustomVirtues() {
                 placeholder="e.g., Patience, Courage, Gratitude"
                 placeholderTextColor={theme.textTertiary}
                 maxLength={50}
+                returnKeyType="done"
+                inputAccessoryViewID={accessoryID}
+                onSubmitEditing={Keyboard.dismiss}
                 testID="virtue-name-input"
               />
             </View>
@@ -156,6 +161,9 @@ export default function CustomVirtues() {
                 multiline
                 numberOfLines={3}
                 maxLength={200}
+                returnKeyType="done"
+                inputAccessoryViewID={accessoryID}
+                onSubmitEditing={Keyboard.dismiss}
                 testID="virtue-description-input"
               />
             </View>
@@ -173,6 +181,9 @@ export default function CustomVirtues() {
                 multiline
                 numberOfLines={4}
                 maxLength={500}
+                returnKeyType="done"
+                inputAccessoryViewID={accessoryID}
+                onSubmitEditing={Keyboard.dismiss}
                 testID="virtue-context-input"
               />
             </View>
@@ -250,6 +261,15 @@ export default function CustomVirtues() {
           </View>
         ))}
       </ScrollView>
+      {Platform.OS === 'ios' ? (
+        <InputAccessoryView nativeID={accessoryID}>
+          <View style={[styles.keyboardToolbar, { backgroundColor: theme.surface, borderTopColor: theme.border }]}> 
+            <TouchableOpacity onPress={Keyboard.dismiss} activeOpacity={0.7} style={styles.keyboardDoneButton}>
+              <Text style={[styles.keyboardDoneText, { color: theme.accent }]}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </InputAccessoryView>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -406,5 +426,20 @@ const styles = StyleSheet.create({
     fontSize: sizes.caption,
     lineHeight: 18,
     fontStyle: 'italic' as const,
+  },
+  keyboardToolbar: {
+    minHeight: 44,
+    borderTopWidth: 1,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  keyboardDoneButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  keyboardDoneText: {
+    ...typography.sans.semibold,
+    fontSize: sizes.label,
   },
 });
