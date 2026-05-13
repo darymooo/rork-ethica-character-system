@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
   virtueCard: {
     padding: 20,
     borderWidth: 1,
-    borderRadius: 0,
+    borderRadius: 16,
   },
   virtueCardHeader: {
     flexDirection: 'row',
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderWidth: 1,
-    borderRadius: 2,
+    borderRadius: 16,
   },
   badgeText: {
     ...typography.sans.medium,
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   expandedContent: {
     borderWidth: 1,
     borderTopWidth: 0,
-    borderRadius: 0,
+    borderRadius: 16,
     padding: 20,
     gap: 16,
   },
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 32,
     alignItems: 'center',
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 16,
   },
   queueNoticeText: {
     ...typography.sans.regular,

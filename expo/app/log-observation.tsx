@@ -455,7 +455,7 @@ export default function LogObservation() {
             <Check size={24} color="#fff" strokeWidth={3} />
           </Animated.View>
           <Text style={[styles.toastText, { color: theme.text }]}>
-            {hasFault ? 'Reflection saved' : 'Great job today!'}
+            {hasFault ? 'Reflection saved' : 'Practice saved'}
           </Text>
         </Animated.View>
       )}
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
   virtueCard: {
     paddingVertical: 20,
     paddingHorizontal: 24,
-    borderRadius: 8,
+    borderRadius: 16,
     borderWidth: 1,
     alignItems: 'center',
     marginBottom: 28,
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     borderWidth: 1.5,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 20,
   },
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
   optionIndicator: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
@@ -600,7 +600,7 @@ const styles = StyleSheet.create({
   },
   noteInput: {
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 16,
     paddingVertical: 14,
     paddingHorizontal: 16,
     ...typography.sans.regular,
@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 8,
+    borderRadius: 16,
     borderWidth: 1,
     marginTop: 8,
   },
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   saveButton: {
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 18,
     paddingHorizontal: 32,
     alignItems: 'center',
@@ -648,7 +648,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 32,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
   toastCheckCircle: {
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,

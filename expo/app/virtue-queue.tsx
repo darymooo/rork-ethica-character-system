@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: 0,
+    borderRadius: 16,
     padding: 16,
   },
   queueItemLeft: {
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 24,
   },
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
   },
   addMenu: {
     borderWidth: 1,
-    borderRadius: 0,
+    borderRadius: 16,
   },
   addMenuItem: {
     paddingVertical: 16,

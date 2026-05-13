@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
   },
   currentAttempt: {
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 16,
   },
   attemptLabel: {
     ...typography.sans.regular,
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 32,
     alignItems: 'center',

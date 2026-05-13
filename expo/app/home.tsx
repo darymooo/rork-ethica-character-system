@@ -37,15 +37,15 @@ export default function Home() {
       
       setTimeout(() => {
         Alert.alert(
-          'Week Complete! 🎉',
-          `Your week of practicing ${currentVirtue.name} is ready for review. Would you like to reflect on your progress?`,
+          'Week complete',
+          `Your week with ${currentVirtue.name} is ready for review. Take a moment to reflect.`,
           [
             {
               text: 'Later',
               style: 'cancel',
             },
             {
-              text: 'Review Now',
+              text: 'Review now',
               onPress: () => router.push('/week-review'),
             },
           ]
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderWidth: 1,
-    borderRadius: 20,
+    borderRadius: 16,
   },
   streakText: {
     ...typography.sans.semibold,
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderWidth: 1,
-    borderRadius: 20,
+    borderRadius: 16,
     gap: 2,
   },
   bestStreakLabel: {
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   progressRing: {
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: 16,
     borderWidth: 3,
     alignItems: 'center',
     justifyContent: 'center',
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     position: 'absolute' as const,
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: 16,
     borderWidth: 3,
     borderRightColor: 'transparent',
     borderBottomColor: 'transparent',
@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
   progressRingInner: {
     width: 66,
     height: 66,
-    borderRadius: 33,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1,
@@ -502,14 +502,14 @@ const styles = StyleSheet.create({
   },
   dayCell: {
     borderWidth: 1,
-    borderRadius: 0,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   faultDot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 16,
   },
   footer: {
     paddingBottom: 32,
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
   },
   logButton: {
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 32,
     alignItems: 'center',
@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
   },
   tipCard: {
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 16,
     paddingVertical: 12,
     paddingHorizontal: 16,
     gap: 8,

@@ -1,32 +1,37 @@
+const sfPro = 'System';
+
 export const typography = {
   serif: {
     regular: {
-      fontFamily: 'Georgia',
+      fontFamily: sfPro,
       fontWeight: '400' as const,
     },
     semibold: {
-      fontFamily: 'Georgia',
-      fontWeight: '600' as const,
+      fontFamily: sfPro,
+      fontWeight: '700' as const,
     },
   },
   sans: {
     regular: {
+      fontFamily: sfPro,
       fontWeight: '400' as const,
     },
     medium: {
+      fontFamily: sfPro,
       fontWeight: '500' as const,
     },
     semibold: {
-      fontWeight: '600' as const,
+      fontFamily: sfPro,
+      fontWeight: '700' as const,
     },
   },
 };
 
 export const sizes = {
   caption: 13,
-  body: 15,
+  body: 16,
   label: 16,
-  title: 20,
-  large: 28,
-  xlarge: 36,
+  title: 22,
+  large: 30,
+  xlarge: 38,
 };

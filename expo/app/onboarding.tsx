@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1,
     justifyContent: 'center',
-    gap: 24,
+    gap: 28,
   },
   title: {
     ...typography.serif.semibold,
@@ -232,14 +232,14 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderWidth: 1,
-    borderRadius: 0,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
   faultDot: {
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 16,
   },
   footer: {
     gap: 32,
@@ -252,11 +252,11 @@ const styles = StyleSheet.create({
   dot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
+    borderRadius: 16,
   },
   button: {
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 32,
     alignItems: 'center',

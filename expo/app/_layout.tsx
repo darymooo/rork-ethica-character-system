@@ -62,8 +62,8 @@ function RootLayoutNav() {
           headerShown: false,
           headerBackTitle: "Back",
           animation: Platform.OS === "ios" ? "slide_from_right" : "fade_from_bottom",
-          animationDuration: 260,
-          contentStyle: { backgroundColor: "#F6F1E8" },
+          animationDuration: 320,
+          contentStyle: { backgroundColor: "#f9f3e7" },
         }}
       >
       <Stack.Screen name="index" />
@@ -90,7 +90,7 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   useEffect(() => {
-    void SystemUI.setBackgroundColorAsync("#F6F1E8");
+    void SystemUI.setBackgroundColorAsync("#f9f3e7");
   }, []);
 
   return (

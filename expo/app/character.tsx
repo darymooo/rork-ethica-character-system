@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 32,
-    paddingBottom: 32,
+    paddingBottom: 48,
   },
   summarySection: {
     alignItems: 'center',
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     marginVertical: 24,
   },
   virtuesSection: {
-    gap: 24,
+    gap: 28,
   },
   sectionTitle: {
     ...typography.sans.medium,
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
     padding: 16,
     borderWidth: 1,
-    borderRadius: 0,
+    borderRadius: 16,
     gap: 16,
   },
   virtueDescriptionSection: {

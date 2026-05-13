@@ -138,8 +138,8 @@ export default function Paywall() {
     try {
       await purchase(selectedPlan);
       Alert.alert(
-        'Success!',
-        'Welcome to Ethica Pro! You now have access to all premium features.',
+        'Subscription active',
+        'Ethica Pro is ready. Your premium tools are now available.',
         [{ text: 'Continue', onPress: () => router.replace(closeDestination) }]
       );
     } catch (error: any) {
@@ -199,7 +199,7 @@ export default function Paywall() {
                 Upgrade to Ethica Pro
               </Text>
               <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-                Unlock the full potential of your character development journey
+                A quieter practice with more room to see clearly
               </Text>
             </View>
 
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 64,
     height: 64,
-    borderRadius: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
   checkContainer: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
   },
   statusCard: {
     borderWidth: 1,
-    borderRadius: 18,
+    borderRadius: 16,
     padding: 18,
     marginBottom: 20,
     gap: 8,
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
   },
   pricingCard: {
     padding: 20,
-    borderRadius: 18,
+    borderRadius: 16,
     position: 'relative',
   },
   pricingCardTablet: {
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
     right: 16,
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 999,
+    borderRadius: 16,
   },
   badgeText: {
     ...typography.sans.semibold,
