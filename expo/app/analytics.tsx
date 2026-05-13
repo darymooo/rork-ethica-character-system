@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingBottom: 48,
+    paddingBottom: 32,
   },
   streakSection: {
     marginBottom: 24,
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
     paddingHorizontal: 24,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 0,
   },
   streakIconContainer: {
     marginBottom: 12,
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     width: '47%',
     padding: 16,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 0,
     alignItems: 'center',
     gap: 8,
   },
@@ -436,13 +436,13 @@ const styles = StyleSheet.create({
   trendBarBackground: {
     width: 24,
     height: 80,
-    borderRadius: 16,
+    borderRadius: 2,
     justifyContent: 'flex-end',
     overflow: 'hidden',
   },
   trendBar: {
     width: '100%',
-    borderRadius: 16,
+    borderRadius: 2,
   },
   trendBarLabel: {
     ...typography.sans.regular,
@@ -472,12 +472,12 @@ const styles = StyleSheet.create({
   },
   virtueProgressBar: {
     height: 4,
-    borderRadius: 16,
+    borderRadius: 2,
     overflow: 'hidden',
   },
   virtueProgressFill: {
     height: '100%',
-    borderRadius: 16,
+    borderRadius: 2,
   },
   emptyState: {
     flex: 1,

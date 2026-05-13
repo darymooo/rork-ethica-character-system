@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 0,
     padding: 20,
     gap: 20,
   },
@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 20,
     gap: 8,
   },
   filterChipText: {
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
   countBadge: {
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 16,
+    borderRadius: 10,
     minWidth: 20,
     alignItems: 'center',
   },
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
   },
   recordCard: {
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 0,
     padding: 20,
     gap: 20,
   },
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
   attemptBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 16,
+    borderRadius: 2,
   },
   attemptBadgeText: {
     ...typography.sans.medium,
@@ -592,7 +592,7 @@ const styles = StyleSheet.create({
   faultDot: {
     width: 6,
     height: 6,
-    borderRadius: 16,
+    borderRadius: 3,
   },
   comparisonSection: {
     borderTopWidth: 1,

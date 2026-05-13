@@ -558,7 +558,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 8,
     gap: 12,
   },
   searchInput: {
@@ -587,7 +587,7 @@ const styles = StyleSheet.create({
   },
   entryCard: {
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 0,
     padding: 16,
     marginBottom: 12,
   },
@@ -607,7 +607,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 16,
+    borderRadius: 12,
     gap: 5,
   },
   moodBadgeText: {
@@ -627,7 +627,7 @@ const styles = StyleSheet.create({
     top: 40,
     right: 12,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 8,
     paddingVertical: 4,
     zIndex: 1000,
     shadowColor: '#000',
@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
   emptyIconContainer: {
     width: 88,
     height: 88,
-    borderRadius: 16,
+    borderRadius: 44,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
@@ -686,7 +686,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 12,
     gap: 8,
   },
   emptyButtonText: {
@@ -698,7 +698,7 @@ const styles = StyleSheet.create({
     right: 24,
     width: 56,
     height: 56,
-    borderRadius: 16,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -739,7 +739,7 @@ const styles = StyleSheet.create({
   saveButton: {
     width: 36,
     height: 36,
-    borderRadius: 16,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -757,7 +757,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 20,
     gap: 6,
   },
   moodChipText: {

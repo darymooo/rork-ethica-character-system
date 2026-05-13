@@ -49,7 +49,7 @@ function ToggleSwitch({ value, onToggle, disabled, theme }: ToggleSwitchProps) {
         style={[
           styles.switchThumb,
           {
-            backgroundColor: theme.surface,
+            backgroundColor: '#FFFFFF',
             transform: [{ translateX }],
           },
         ]}
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
   backButton: {
     width: 36,
     height: 36,
-    borderRadius: 16,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 56,
+    paddingBottom: 40,
   },
   section: {
     marginTop: 24,
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   sectionCard: {
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: 'hidden',
   },
   settingRow: {
@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
   settingIconContainer: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -574,14 +574,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 8,
     minWidth: 70,
     textAlign: 'center',
   },
   timeDisplay: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 8,
   },
   timeText: {
     ...typography.sans.medium,
@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 12,
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 12,
     marginHorizontal: 4,
   },
   footerText: {
@@ -620,7 +620,7 @@ const styles = StyleSheet.create({
   upgradeIconContainer: {
     width: 48,
     height: 48,
-    borderRadius: 16,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },

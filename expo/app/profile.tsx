@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: '45%',
     padding: 12,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     alignItems: 'center',
     gap: 8,
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   },
   cycleProgress: {
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     gap: 12,
   },
@@ -507,19 +507,19 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 6,
-    borderRadius: 16,
+    borderRadius: 3,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 16,
+    borderRadius: 3,
   },
   insightsList: {
     gap: 12,
   },
   insightCard: {
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     gap: 8,
   },
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
   insightRow: {
     flexDirection: 'row',
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
   },
   insightRowItem: {
@@ -580,14 +580,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 14,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     gap: 14,
   },
   achievementIcon: {
     width: 40,
     height: 40,
-    borderRadius: 16,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -612,12 +612,12 @@ const styles = StyleSheet.create({
   achievementProgressBar: {
     flex: 1,
     height: 4,
-    borderRadius: 16,
+    borderRadius: 2,
     overflow: 'hidden',
   },
   achievementProgressFill: {
     height: '100%',
-    borderRadius: 16,
+    borderRadius: 2,
   },
   achievementProgressText: {
     ...typography.sans.regular,
@@ -626,7 +626,7 @@ const styles = StyleSheet.create({
   checkmark: {
     width: 24,
     height: 24,
-    borderRadius: 16,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },

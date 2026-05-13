@@ -51,7 +51,7 @@ export default function CustomVirtues() {
     setDescription('');
     setContext('');
     setIsAdding(false);
-    Alert.alert('Success', 'Your custom virtue is ready.');
+    Alert.alert('Success', 'Your custom virtue has been created!');
   };
 
   const handleDelete = (id: string, virtueName: string) => {
@@ -301,20 +301,20 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 32,
     paddingBottom: 32,
-    gap: 20,
+    gap: 16,
   },
   proCard: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 2,
     gap: 12,
   },
   proIconContainer: {
     width: 40,
     height: 40,
-    borderRadius: 16,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   },
   addForm: {
     padding: 20,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     gap: 20,
   },
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   input: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 16,
+    borderRadius: 8,
     borderWidth: 1,
     ...typography.sans.regular,
     fontSize: sizes.body,
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   formButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 16,
+    borderRadius: 8,
     borderWidth: 1,
     alignItems: 'center',
   },
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   },
   virtueCard: {
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     gap: 8,
   },
