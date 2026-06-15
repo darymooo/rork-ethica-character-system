@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   headerRight: {
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   virtueName: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.xlarge,
   },
   faultsContainer: {
@@ -309,11 +309,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   faultsNumber: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     lineHeight: 80,
   },
   faultsLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
   },
   comparisonSection: {
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   comparisonTitle: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -343,11 +343,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   attemptLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   attemptFaults: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.title,
   },
   quoteContainer: {
@@ -357,14 +357,14 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   quoteText: {
-    ...typography.serif.regular,
+    ...typography.medium,
     fontSize: sizes.body,
     lineHeight: 26,
     textAlign: 'center',
     fontStyle: 'italic' as const,
   },
   quoteAuthor: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
     textAlign: 'center',
   },
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryButtonText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
   },
   secondaryButton: {
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   secondaryButtonText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
   },
 });

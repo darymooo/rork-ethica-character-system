@@ -8,6 +8,7 @@ import colors from '@/constants/colors';
 import { typography, sizes } from '@/constants/typography';
 import { useEffect, useRef, useState } from 'react';
 import FranklinMethodModal from '@/components/FranklinMethodModal';
+import * as Haptics from 'expo-haptics';
 
 export default function Home() {
   const { state, getCycleProgress, getCurrentWeekObservations, getStreakData, isWeekComplete, isSaving } = useEthica();
@@ -37,7 +38,7 @@ export default function Home() {
       
       setTimeout(() => {
         Alert.alert(
-          'Week Complete! 🎉',
+          'Week Complete',
           `Your week of practicing ${currentVirtue.name} is ready for review. Would you like to reflect on your progress?`,
           [
             {
@@ -62,6 +63,7 @@ export default function Home() {
   };
 
   const handleDayPress = (_dayIndex: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push('/log-observation');
   };
 
@@ -380,7 +382,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   offlineText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 9,
     letterSpacing: 0.3,
   },
@@ -411,7 +413,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   streakText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
   },
   bestStreakBadge: {
@@ -423,13 +425,13 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   bestStreakLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 9,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   bestStreakText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.caption,
   },
   progressRing: {
@@ -459,27 +461,27 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   cycleProgressText: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: 24,
   },
   cycleProgressTotal: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 11,
   },
   virtueName: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.xlarge,
     textAlign: 'center',
   },
   virtueDescription: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     lineHeight: 24,
     textAlign: 'center',
     paddingHorizontal: 16,
   },
   weekLabel: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     marginTop: 8,
     letterSpacing: 1,
@@ -497,7 +499,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   dayLabel: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
   },
   dayCell: {
@@ -523,7 +525,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logButtonText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
   },
   reviewButton: {
@@ -531,7 +533,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   reviewButtonText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
   },
   tipCard: {
@@ -548,13 +550,13 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   tipTitle: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.caption,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   tipText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
     lineHeight: 18,
   },
@@ -572,12 +574,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   weekCompleteTitle: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
     color: '#FFFFFF',
   },
   weekCompleteSubtitle: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
     color: 'rgba(255,255,255,0.85)',
     marginTop: 2,
@@ -589,13 +591,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   emptyStateTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.large,
     textAlign: 'center',
     marginBottom: 12,
   },
   emptyStateText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     textAlign: 'center',
     lineHeight: 24,

@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   statsButton: {
@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   statsTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   statsGrid: {
@@ -433,11 +433,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   statNumber: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: 32,
   },
   statLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
     textAlign: 'center',
   },
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   virtueStatsTitle: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   virtueStatName: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.body,
   },
   virtueStatValues: {
@@ -467,11 +467,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   virtueStatText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   virtueStatDivider: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   filterSection: {
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   filterTitle: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   filterChipText: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
   },
   countBadge: {
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   countBadgeText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: 10,
   },
   recordsContainer: {
@@ -547,15 +547,15 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   attemptBadgeText: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: 11,
   },
   virtueName: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   dateRange: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   faultSummary: {
@@ -563,11 +563,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   faultNumber: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: 28,
   },
   faultLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   weekGridContainer: {
@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   dayLabel: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
   },
   dayCell: {
@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   comparisonTitle: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   comparisonWeek: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
   },
   comparisonFaults: {
@@ -626,11 +626,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   comparisonFaultCount: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   comparisonDiff: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.caption,
   },
   notesSection: {
@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   notesTitle: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -649,12 +649,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   noteDay: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.body,
     minWidth: 36,
   },
   noteText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     flex: 1,
     lineHeight: 22,
@@ -668,12 +668,12 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   emptyText: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
     textAlign: 'center',
   },
   emptySubtext: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     textAlign: 'center',
     paddingHorizontal: 32,

@@ -366,11 +366,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.large,
   },
   subtitle: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
   },
   scrollView: {
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   badgeText: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: 10,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
@@ -424,11 +424,11 @@ const styles = StyleSheet.create({
     padding: 2,
   },
   virtueName: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   virtueDescription: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     lineHeight: 22,
   },
@@ -443,13 +443,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   contextTitle: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
   contextText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     lineHeight: 22,
   },
@@ -460,13 +460,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   quote: {
-    ...typography.serif.regular,
+    ...typography.medium,
     fontSize: sizes.body,
     lineHeight: 24,
     fontStyle: 'italic' as const,
   },
   quoteAttribution: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   footer: {
@@ -479,11 +479,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   confirmationText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
   },
   confirmationVirtue: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.body,
   },
   confirmButton: {
@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   confirmButtonText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
   },
   queueNotice: {
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   queueNoticeText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     textAlign: 'center',
   },
@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   sectionTitle: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 1,
     textTransform: 'uppercase',

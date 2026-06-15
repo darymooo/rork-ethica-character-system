@@ -16,7 +16,7 @@
 
 **Pages / Screens**
 - [x] Paywall: elevate the visual hierarchy, make plans easier to compare, and keep restore and refresh actions visible but secondary.
-- [ ] Onboarding: strengthen the first impression with more polished pacing, cleaner steps, and a smoother transition into subscription.
+- [x] Onboarding: strengthen the first impression with more polished pacing, cleaner steps, and a smoother transition into subscription.
 - [x] Main experience: improve spacing, readability, and rhythm so daily use feels calmer and more premium.
 - [x] iPad layouts: adapt screens so they feel intentionally designed for larger displays instead of stretched phone screens.
 - [x] Loading and transition moments: replace abrupt state changes with lightweight polished feedback.

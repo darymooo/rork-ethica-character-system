@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   headerRight: {
@@ -441,15 +441,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   heroLabel: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 1.5,
   },
   heroDate: {
-    ...typography.serif.semibold,
+    ...typography.bold,
   },
   heroDays: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     marginTop: 4,
   },
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   sectionTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.label,
   },
   statsGrid: {
@@ -478,11 +478,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   statValue: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: 24,
   },
   statLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
     textAlign: 'center',
   },
@@ -498,11 +498,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cycleTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.body,
   },
   cycleCount: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   progressBar: {
@@ -529,16 +529,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   insightLabel: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 0.5,
   },
   insightValue: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.label,
   },
   insightHint: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 12,
   },
   insightRow: {
@@ -553,11 +553,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   insightRowLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   insightRowValue: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   insightDivider: {
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   achievementCount: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
   },
   achievementsList: {
@@ -596,11 +596,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   achievementTitle: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.body,
   },
   achievementDesc: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 12,
   },
   achievementProgress: {
@@ -620,7 +620,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   achievementProgressText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 12,
   },
   checkmark: {
@@ -642,14 +642,14 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   quoteText: {
-    ...typography.serif.regular,
+    ...typography.medium,
     fontSize: sizes.body,
     lineHeight: 26,
     textAlign: 'center',
     fontStyle: 'italic' as const,
   },
   quoteAuthor: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
     textAlign: 'center',
   },

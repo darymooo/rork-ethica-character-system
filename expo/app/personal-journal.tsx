@@ -539,11 +539,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   headerSubtitle: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 11,
     marginTop: 2,
   },
@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     padding: 0,
   },
@@ -578,7 +578,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   dateLabel: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
@@ -611,12 +611,12 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   moodBadgeText: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: 11,
     textTransform: 'capitalize',
   },
   entryTime: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   menuButton: {
@@ -644,11 +644,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   menuItemText: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.body,
   },
   entryContent: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     lineHeight: 24,
   },
@@ -668,13 +668,13 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   emptyTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.large,
     textAlign: 'center',
     marginBottom: 12,
   },
   emptySubtitle: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     textAlign: 'center',
     lineHeight: 24,
@@ -690,7 +690,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   emptyButtonText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
   },
   fab: {
@@ -733,7 +733,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   composerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   saveButton: {
@@ -761,11 +761,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   moodChipText: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
   },
   composerInput: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     lineHeight: 26,
     minHeight: 120,
@@ -783,7 +783,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   keyboardDoneText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
   },
 });

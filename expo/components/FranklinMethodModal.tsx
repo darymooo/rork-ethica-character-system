@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   headerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   closeButton: {
@@ -136,11 +136,11 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   sectionTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   bodyText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     lineHeight: 24,
   },
@@ -151,13 +151,13 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   quoteText: {
-    ...typography.serif.regular,
+    ...typography.medium,
     fontSize: sizes.body,
     lineHeight: 26,
     fontStyle: 'italic' as const,
   },
   quoteAttribution: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
 });

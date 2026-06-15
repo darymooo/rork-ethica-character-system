@@ -51,7 +51,7 @@ export default function CustomVirtues() {
     setDescription('');
     setContext('');
     setIsAdding(false);
-    Alert.alert('Success', 'Your custom virtue has been created!');
+    Alert.alert('Virtue Created', 'Your custom virtue has been added.');
   };
 
   const handleDelete = (id: string, virtueName: string) => {
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   addButton: {
@@ -323,11 +323,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   proTitle: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
   },
   proSubtitle: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
     lineHeight: 18,
   },
@@ -338,14 +338,14 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   formTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   inputGroup: {
     gap: 8,
   },
   inputLabel: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 1,
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
   },
   textArea: {
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   formButtonText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
   },
   emptyState: {
@@ -387,12 +387,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   emptyTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
     textAlign: 'center',
   },
   emptyText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     textAlign: 'center',
     lineHeight: 22,
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   virtueName: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
     flex: 1,
   },
@@ -417,12 +417,12 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   virtueDescription: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     lineHeight: 22,
   },
   virtueContext: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
     lineHeight: 18,
     fontStyle: 'italic' as const,
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   keyboardDoneText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
   },
 });

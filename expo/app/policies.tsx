@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   headerRight: {
@@ -224,19 +224,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabButtonText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.body,
   },
   section: {
     paddingVertical: 24,
   },
   sectionTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.large,
     marginBottom: 4,
   },
   lastUpdated: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
     marginBottom: 24,
   },
@@ -244,12 +244,12 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   heading: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
     marginTop: 8,
   },
   paragraph: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     lineHeight: 24,
   },

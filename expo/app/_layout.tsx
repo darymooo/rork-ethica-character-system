@@ -35,7 +35,7 @@ function RootLayoutNav() {
       const style = document.createElement("style");
       style.textContent = `button, [role="button"], a { touch-action: manipulation; -webkit-tap-highlight-color: transparent; } @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; } }`;
       document.head.appendChild(style);
-      return () => document.head.removeChild(style);
+      return () => { document.head.removeChild(style); };
     }
   }, []);
 
@@ -62,8 +62,8 @@ function RootLayoutNav() {
           headerShown: false,
           headerBackTitle: "Back",
           animation: Platform.OS === "ios" ? "slide_from_right" : "fade_from_bottom",
-          animationDuration: 260,
-          contentStyle: { backgroundColor: "#F6F1E8" },
+          animationDuration: 280,
+          contentStyle: { backgroundColor: "#FBFAF6" },
         }}
       >
       <Stack.Screen name="index" />
@@ -90,7 +90,7 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   useEffect(() => {
-    void SystemUI.setBackgroundColorAsync("#F6F1E8");
+    void SystemUI.setBackgroundColorAsync("#FBFAF6");
   }, []);
 
   return (

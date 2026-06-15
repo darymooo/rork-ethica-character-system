@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   headerRight: {
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
   },
   descriptionText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     lineHeight: 24,
     textAlign: 'center',
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
   },
   queueList: {
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   orderNumber: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.body,
   },
   virtueInfo: {
@@ -261,11 +261,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   virtueName: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.body,
   },
   virtueDescription: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   queueItemActions: {
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   moveButtonText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: 16,
   },
   removeButton: {
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   addButtonText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.body,
   },
   addMenu: {
@@ -316,11 +316,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   addMenuItemName: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.body,
   },
   addMenuItemDesc: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
 });

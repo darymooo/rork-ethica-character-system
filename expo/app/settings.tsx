@@ -237,13 +237,13 @@ export default function Settings() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.backgroundSecondary }]} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}
       >
-      <View style={[styles.header, { backgroundColor: theme.backgroundSecondary }]}>
+      <View style={[styles.header, { backgroundColor: theme.background }]}>
         <TouchableOpacity
           style={[styles.backButton, { backgroundColor: theme.surface }]}
           onPress={() => {
@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   headerRight: {
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   sectionTitle: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: 12,
     letterSpacing: 0.5,
     marginBottom: 8,
@@ -544,11 +544,11 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   settingLabel: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: 15,
   },
   settingSubLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 12,
     marginTop: 2,
   },
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   timeInput: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: 14,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -584,7 +584,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   timeText: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: 14,
   },
   footer: {
@@ -601,13 +601,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   footerText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 13,
     lineHeight: 18,
     flex: 1,
   },
   versionText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 12,
     marginTop: 8,
   },
@@ -629,11 +629,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   upgradeTitle: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: 16,
   },
   upgradeSubtitle: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 13,
     lineHeight: 18,
   },

@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.light.background,
   },
   title: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.large,
     color: colors.light.text,
   },
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   linkText: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.body,
     color: colors.light.accent,
   },

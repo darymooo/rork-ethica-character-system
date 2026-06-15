@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   headerRight: {
@@ -210,12 +210,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   summaryNumber: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: 56,
     lineHeight: 64,
   },
   summaryLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
   },
   divider: {
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     gap: 24,
   },
   sectionTitle: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -247,11 +247,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   virtueName: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   weekCount: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   virtueDetails: {
@@ -265,13 +265,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   virtueDescriptionLabel: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
   virtueDescriptionText: {
-    ...typography.serif.regular,
+    ...typography.medium,
     fontSize: sizes.body,
     lineHeight: 22,
   },
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   virtueContextText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     lineHeight: 22,
   },
@@ -290,13 +290,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   quote: {
-    ...typography.serif.regular,
+    ...typography.medium,
     fontSize: sizes.body,
     lineHeight: 24,
     fontStyle: 'italic' as const,
   },
   quoteAttribution: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   allAttemptsContainer: {
@@ -309,11 +309,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   attemptNumber: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
   },
   attemptFaultCount: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.body,
   },
   emptyState: {
@@ -324,12 +324,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   emptyText: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
     textAlign: 'center',
   },
   emptySubtext: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     textAlign: 'center',
     paddingHorizontal: 32,

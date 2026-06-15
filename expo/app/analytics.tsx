@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   headerRight: {
@@ -320,11 +320,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   streakNumber: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     lineHeight: 72,
   },
   streakLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     marginTop: 4,
   },
@@ -343,11 +343,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   streakMetaValue: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.title,
   },
   streakMetaLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   streakMetaDivider: {
@@ -369,11 +369,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   statValue: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.large,
   },
   statLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
     textAlign: 'center',
   },
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   sectionTitle: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -400,12 +400,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   insightLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     flex: 1,
   },
   insightValue: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.body,
   },
   trendSection: {
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   trendBarValue: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 11,
   },
   trendBarBackground: {
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   trendBarLabel: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: 10,
     textTransform: 'uppercase',
   },
@@ -463,11 +463,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   virtueStatName: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.label,
   },
   virtueStatMeta: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   virtueProgressBar: {
@@ -487,12 +487,12 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   emptyTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
     marginTop: 8,
   },
   emptyText: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     textAlign: 'center',
     lineHeight: 22,

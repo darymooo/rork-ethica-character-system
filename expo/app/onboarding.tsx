@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     gap: 24,
   },
   title: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.xlarge,
     lineHeight: 44,
     textAlign: 'center',
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   body: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     lineHeight: 24,
     textAlign: 'center',
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   dayLabel: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
   },
   dayCell: {
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
   },
 });

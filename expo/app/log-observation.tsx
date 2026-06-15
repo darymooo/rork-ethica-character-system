@@ -455,7 +455,7 @@ export default function LogObservation() {
             <Check size={24} color="#fff" strokeWidth={3} />
           </Animated.View>
           <Text style={[styles.toastText, { color: theme.text }]}>
-            {hasFault ? 'Reflection saved' : 'Great job today!'}
+            {hasFault ? 'Reflection saved' : 'Well done today'}
           </Text>
         </Animated.View>
       )}
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
     width: 24,
   },
   headerTitle: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.title,
   },
   closeButton: {
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   dateText: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 1,
     textTransform: 'uppercase',
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   virtueName: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.xlarge,
     marginBottom: 12,
   },
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   virtueDescription: {
-    ...typography.serif.regular,
+    ...typography.medium,
     fontSize: sizes.body,
     textAlign: 'center',
     lineHeight: 24,
@@ -544,14 +544,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   questionLabel: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
     marginBottom: 6,
   },
   question: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.large,
     textAlign: 'center',
   },
@@ -582,19 +582,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   optionTitle: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
     marginBottom: 2,
   },
   optionSubtitle: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
   },
   noteSection: {
     marginBottom: 20,
   },
   noteLabel: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
     marginBottom: 10,
   },
@@ -603,12 +603,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.body,
     minHeight: 90,
   },
   characterCount: {
-    ...typography.sans.regular,
+    ...typography.regular,
     fontSize: sizes.caption,
     textAlign: 'right',
     marginTop: 6,
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   dismissKeyboardText: {
-    ...typography.sans.medium,
+    ...typography.medium,
     fontSize: sizes.caption,
   },
   footer: {
@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveButtonText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
   },
   toastContainer: {
@@ -665,7 +665,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   toastText: {
-    ...typography.serif.semibold,
+    ...typography.bold,
     fontSize: sizes.large,
   },
   keyboardToolbar: {
@@ -680,7 +680,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   keyboardDoneText: {
-    ...typography.sans.semibold,
+    ...typography.semibold,
     fontSize: sizes.label,
   },
 });
