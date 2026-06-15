@@ -1,4 +1,5 @@
 {
+  "$schema": "https://rork.com/schema/rork.json",
   "apps": [
     {
       "name": "My Ethica",
@@ -8,8 +9,10 @@
     {
       "name": "Ethica",
       "path": "ios",
-      "framework": "swift"
+      "framework": "swift",
+      "settings": {
+        "iosBundleId": "app.rork.ethica-character-system-az74np5"
+      }
     }
-  ],
-  "$schema": "https://rork.com/schema/rork.json"
+  ]
 }
